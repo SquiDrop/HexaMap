@@ -1,4 +1,5 @@
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from "react-leaflet";
+import { useMapEvents } from "react-leaflet";
 import { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
 
@@ -10,6 +11,8 @@ function MapView() {
     { name: "Marseille", coords: [43.2965, 5.3698] },
     { name: "Lyon", coords: [45.7640, 4.8357] }
   ]);
+  const [isShiftPressed, setIsShiftPressed] = useState(false);
+
 
   useEffect(() => {
     fetch("/departements.geojson")
@@ -54,6 +57,49 @@ function MapView() {
     });
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Shift") setIsShiftPressed(true);
+    };
+
+    const handleKeyUp = (e) => {
+      if (e.key === "Shift") setIsShiftPressed(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
+
+  const addPlace = (place) => {
+    setVisitedPlaces((prev) => [...prev, place]);
+  };
+
+  function MapClickHandler({ isShiftPressed, onAddPlace }) {
+    useMapEvents({
+      click(e) {
+        if (!isShiftPressed) return; // ne rien faire si Shift n'est pas appuyé
+
+        const { lat, lng } = e.latlng;
+        const name = prompt("Nom du lieu visité ?");
+        if (!name) return;
+
+        onAddPlace({
+          name,
+          coords: [lat, lng]
+        });
+      }
+    });
+
+    return null;
+  }
+
+
+
   return (
     <MapContainer
       center={[46.6, 2.5]}
@@ -63,6 +109,10 @@ function MapView() {
       <TileLayer
         attribution="&copy; OpenStreetMap contributors"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <MapClickHandler
+        isShiftPressed={isShiftPressed}
+        onAddPlace={addPlace}
       />
 
       {departementsData && (
