@@ -2,6 +2,8 @@ import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from "react-leaflet";
 import { useMapEvents } from "react-leaflet";
 import { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
+import * as turf from "@turf/turf";
+
 
 function MapView() {
   const [departementsData, setDepartementsData] = useState(null);
@@ -33,8 +35,6 @@ function MapView() {
     );
   }, [visitedPlaces]);
 
-
-
   useEffect(() => {
     fetch("/departements.geojson")
       .then((res) => res.json())
@@ -57,16 +57,48 @@ function MapView() {
     };
   };
 
+  const getDepartmentCodeFromCoords = (lat, lng) => {
+    if (!departementsData) return null;
+
+    const point = turf.point([lng, lat]); // turf = [lng, lat]
+
+    for (const feature of departementsData.features) {
+      if (turf.booleanPointInPolygon(point, feature)) {
+        return feature.properties.code;
+      }
+    }
+
+    return null;
+  };
+
+
   const onEachFeature = (feature, layer) => {
     layer.on({
       click: () => {
         const code = feature.properties.code;
+
+        const hasPlacesInside = visitedPlaces.some((place) => {
+          const dept = getDepartmentCodeFromCoords(
+            place.coords[0],
+            place.coords[1]
+          );
+          return dept === code;
+        });
+
+        if (visitedDepartments.includes(code) && hasPlacesInside) {
+          alert(
+            "Ce département contient des lieux visités.\nSupprime-les d'abord pour le désélectionner."
+          );
+          return;
+        }
+
         setVisitedDepartments((prev) =>
           prev.includes(code)
             ? prev.filter((c) => c !== code)
             : [...prev, code]
         );
-      },
+      }
+      ,
       mouseover: (e) => {
         const l = e.target;
         l.setStyle({ weight: 3, color: "#2e1e69" });
@@ -97,8 +129,18 @@ function MapView() {
   }, []);
 
   const addPlace = (place) => {
+    const deptCode = getDepartmentCodeFromCoords(
+      place.coords[0],
+      place.coords[1]
+    );
+
     setVisitedPlaces((prev) => [...prev, place]);
+
+    if (deptCode && !visitedDepartments.includes(deptCode)) {
+      setVisitedDepartments((prev) => [...prev, deptCode]);
+    }
   };
+
 
   const removePlace = (indexToRemove) => {
     const confirmDelete = window.confirm("Supprimer ce lieu ?");
@@ -148,7 +190,7 @@ function MapView() {
 
       {departementsData && (
         <GeoJSON
-          key={JSON.stringify(visitedDepartments)}
+          key={JSON.stringify(visitedDepartments) + JSON.stringify(visitedPlaces)}
           data={departementsData}
           style={style}
           onEachFeature={onEachFeature}
