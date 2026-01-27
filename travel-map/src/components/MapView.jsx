@@ -100,6 +100,15 @@ function MapView() {
     setVisitedPlaces((prev) => [...prev, place]);
   };
 
+  const removePlace = (indexToRemove) => {
+    const confirmDelete = window.confirm("Supprimer ce lieu ?");
+    if (!confirmDelete) return;
+
+    setVisitedPlaces((prev) =>
+      prev.filter((_, index) => index !== indexToRemove)
+    );
+  };
+
   function MapClickHandler({ onAddPlace }) {
     useMapEvents({
       click(e) {
@@ -148,9 +157,27 @@ function MapView() {
 
       {visitedPlaces.map((place, idx) => (
         <Marker key={idx} position={place.coords}>
-          <Popup>{place.name}</Popup>
+          <Popup>
+            <strong>{place.name}</strong>
+            <br />
+            <button
+              onClick={() => removePlace(idx)}
+              style={{
+                marginTop: "6px",
+                background: "#e74c3c",
+                color: "white",
+                border: "none",
+                padding: "4px 8px",
+                cursor: "pointer",
+                borderRadius: "4px"
+              }}
+            >
+              Supprimer
+            </button>
+          </Popup>
         </Marker>
       ))}
+
     </MapContainer>
   );
 }
