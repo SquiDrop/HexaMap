@@ -5,13 +5,34 @@ import "leaflet/dist/leaflet.css";
 
 function MapView() {
   const [departementsData, setDepartementsData] = useState(null);
-  const [visitedDepartments, setVisitedDepartments] = useState(["33", "40", "47"]);
-  const [visitedPlaces, setVisitedPlaces] = useState([
-    { name: "Paris", coords: [48.8566, 2.3522] },
-    { name: "Marseille", coords: [43.2965, 5.3698] },
-    { name: "Lyon", coords: [45.7640, 4.8357] }
-  ]);
-  const [isShiftPressed, setIsShiftPressed] = useState(false);
+  const [visitedDepartments, setVisitedDepartments] = useState(() => {
+    const saved = localStorage.getItem("visitedDepartments");
+    return saved ? JSON.parse(saved) : ["33"];
+  });
+
+  const [visitedPlaces, setVisitedPlaces] = useState(() => {
+    const saved = localStorage.getItem("visitedPlaces");
+    return saved
+      ? JSON.parse(saved)
+      : [
+        { name: "ENSC", coords: [44.8153, -0.5742] },
+      ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem(
+      "visitedDepartments",
+      JSON.stringify(visitedDepartments)
+    );
+  }, [visitedDepartments]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "visitedPlaces",
+      JSON.stringify(visitedPlaces)
+    );
+  }, [visitedPlaces]);
+
 
 
   useEffect(() => {
@@ -79,10 +100,11 @@ function MapView() {
     setVisitedPlaces((prev) => [...prev, place]);
   };
 
-  function MapClickHandler({ isShiftPressed, onAddPlace }) {
+  function MapClickHandler({ onAddPlace }) {
     useMapEvents({
       click(e) {
-        if (!isShiftPressed) return; // ne rien faire si Shift n'est pas appuyé
+        // Vérifie l'état réel de Shift AU MOMENT du clic
+        if (!e.originalEvent.shiftKey) return;
 
         const { lat, lng } = e.latlng;
         const name = prompt("Nom du lieu visité ?");
@@ -100,6 +122,7 @@ function MapView() {
 
 
 
+
   return (
     <MapContainer
       center={[46.6, 2.5]}
@@ -111,7 +134,6 @@ function MapView() {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <MapClickHandler
-        isShiftPressed={isShiftPressed}
         onAddPlace={addPlace}
       />
 
