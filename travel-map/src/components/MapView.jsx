@@ -21,6 +21,12 @@ function MapView() {
       ];
   });
 
+  const totalDepartments = departementsData
+    ? departementsData.features.length
+    : 0;
+  const visitedCount = visitedDepartments.length;
+
+
   useEffect(() => {
     localStorage.setItem(
       "visitedDepartments",
@@ -41,7 +47,8 @@ function MapView() {
       .then((data) => setDepartementsData(data));
   }, []);
 
-  const VISITED_STYLE = { fillColor: "#91ea94", fillOpacity: 0, borderOpacity: 1 };
+  const VISITED_STYLE
+    = { fillColor: "#91ea94", fillOpacity: 0, borderOpacity: 1 };
   const UNVISITED_STYLE = { fillColor: "#ffffff", fillOpacity: 0.4, borderOpacity: 0.1 };
 
   const style = (feature) => {
@@ -136,8 +143,12 @@ function MapView() {
 
     setVisitedPlaces((prev) => [...prev, place]);
 
-    if (deptCode && !visitedDepartments.includes(deptCode)) {
-      setVisitedDepartments((prev) => [...prev, deptCode]);
+    if (deptCode) {
+      setVisitedDepartments((prev) => {
+        const newSet = new Set(prev);
+        newSet.add(deptCode);
+        return Array.from(newSet);
+      });
     }
   };
 
@@ -175,6 +186,26 @@ function MapView() {
 
 
   return (
+  <>
+    <div
+      style={{
+        position: "absolute",
+        top: "12px",
+        right: "12px",
+        zIndex: 1000,
+        background: "white",
+        padding: "10px 14px",
+        borderRadius: "8px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+        fontSize: "14px",
+        lineHeight: "1.4"
+      }}
+    >
+      <strong>Départements visités</strong>
+      <br />
+      {visitedCount} / {totalDepartments}
+    </div>
+
     <MapContainer
       center={[46.6, 2.5]}
       zoom={6}
@@ -184,9 +215,8 @@ function MapView() {
         attribution="&copy; OpenStreetMap contributors"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <MapClickHandler
-        onAddPlace={addPlace}
-      />
+
+      <MapClickHandler onAddPlace={addPlace} />
 
       {departementsData && (
         <GeoJSON
@@ -219,9 +249,10 @@ function MapView() {
           </Popup>
         </Marker>
       ))}
-
     </MapContainer>
-  );
+  </>
+);
+
 }
 
 export default MapView;
