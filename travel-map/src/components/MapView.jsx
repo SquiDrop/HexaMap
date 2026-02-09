@@ -5,6 +5,8 @@ import "leaflet/dist/leaflet.css";
 import * as turf from "@turf/turf";
 
 
+
+
 function MapView() {
   const [departementsData, setDepartementsData] = useState(null);
   const [visitedDepartments, setVisitedDepartments] = useState(() => {
@@ -186,72 +188,73 @@ function MapView() {
 
 
   return (
-  <>
-    <div
-      style={{
-        position: "absolute",
-        top: "12px",
-        right: "12px",
-        zIndex: 1000,
-        background: "white",
-        padding: "10px 14px",
-        borderRadius: "8px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-        fontSize: "14px",
-        lineHeight: "1.4"
-      }}
-    >
-      <strong>Départements visités</strong>
-      <br />
-      {visitedCount} / {totalDepartments}
-    </div>
+    <>
+      <div
+        style={{
+          position: "absolute",
+          top: "12px",
+          right: "12px",
+          zIndex: 1000,
+          background: "white",
+          padding: "10px 14px",
+          borderRadius: "8px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+          fontSize: "40px",
+          lineHeight: "1.4"
+        }}
+      >
+        <strong>Départements visités</strong>
+        <br />
+        {visitedCount} / {totalDepartments}
+        <br />
+      </div>
 
-    <MapContainer
-      center={[46.6, 2.5]}
-      zoom={6}
-      style={{ height: "100vh", width: "100%" }}
-    >
-      <TileLayer
-        attribution="&copy; OpenStreetMap contributors"
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-
-      <MapClickHandler onAddPlace={addPlace} />
-
-      {departementsData && (
-        <GeoJSON
-          key={JSON.stringify(visitedDepartments) + JSON.stringify(visitedPlaces)}
-          data={departementsData}
-          style={style}
-          onEachFeature={onEachFeature}
+      <MapContainer
+        center={[46.6, 2.5]}
+        zoom={6}
+        style={{ height: "100vh", width: "100%" }}
+      >
+        <TileLayer
+          attribution="&copy; OpenStreetMap contributors"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-      )}
 
-      {visitedPlaces.map((place, idx) => (
-        <Marker key={idx} position={place.coords}>
-          <Popup>
-            <strong>{place.name}</strong>
-            <br />
-            <button
-              onClick={() => removePlace(idx)}
-              style={{
-                marginTop: "6px",
-                background: "#e74c3c",
-                color: "white",
-                border: "none",
-                padding: "4px 8px",
-                cursor: "pointer",
-                borderRadius: "4px"
-              }}
-            >
-              Supprimer
-            </button>
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
-  </>
-);
+        <MapClickHandler onAddPlace={addPlace} />
+
+        {departementsData && (
+          <GeoJSON
+            key={JSON.stringify(visitedDepartments) + JSON.stringify(visitedPlaces)}
+            data={departementsData}
+            style={style}
+            onEachFeature={onEachFeature}
+          />
+        )}
+
+        {visitedPlaces.map((place, idx) => (
+          <Marker key={idx} position={place.coords}>
+            <Popup>
+              <strong>{place.name}</strong>
+              <br />
+              <button
+                onClick={() => removePlace(idx)}
+                style={{
+                  marginTop: "6px",
+                  background: "#e74c3c",
+                  color: "white",
+                  border: "none",
+                  padding: "4px 8px",
+                  cursor: "pointer",
+                  borderRadius: "4px"
+                }}
+              >
+                Supprimer
+              </button>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </>
+  );
 
 }
 
