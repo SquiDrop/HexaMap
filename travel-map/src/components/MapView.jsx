@@ -56,6 +56,23 @@ function MapView() {
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [newPlaceModal, setNewPlaceModal] = useState({ isOpen: false, coords: null, editIndex: null });
 
+  //Europe
+  const [worldData, setWorldData] = useState(null);
+  const isEuropeanCountry = (feature) => {
+  const europeCountries = [
+    "Spain","Portugal","Italy","Belgium","Netherlands","Germany",
+    "Switzerland","Austria","United Kingdom","Ireland","Luxembourg",
+    "Denmark","Poland","Czechia","Slovakia","Hungary","Slovenia",
+    "Croatia","Bosnia and Herz.","Serbia","Montenegro","Albania",
+    "Greece","Bulgaria","Romania","Norway","Sweden","Finland", 
+    "Czech Republic", "Bosnia and Herzegovina", "Kosovo", "Republic of Serbia",
+    "Macedonia", "Morocco", "Algeria", "Libya", "Tunisia", "Russia"
+  ];
+
+  return europeCountries.includes(feature.properties.name);
+};
+
+
   // Formulaire
   const [formName, setFormName] = useState("");
   const [formComment, setFormComment] = useState("");
@@ -105,6 +122,12 @@ function MapView() {
       .then((data) => setDepartementsData(data));
   }, []);
 
+  useEffect(() => {
+    fetch("/world.geojson")
+      .then((res) => res.json())
+      .then((data) => setWorldData(data));
+  }, []);
+
 
   // --- GESTION DU CLIC POUR AJOUTER (Centralisé) ---
   const openAddModal = (lat, lng) => {
@@ -118,15 +141,44 @@ function MapView() {
   const style = (feature) => {
     const isVisited = activeDepartments.includes(feature.properties.code);
     return {
-      fillColor: isVisited ? "#91ea94" : "#ffffff",
+      fillColor: isVisited ? "#4bbb83" : "#ffffff",
       // Si visité : 0 (transparent) pour voir la carte. Si pas visité : 0.4 (voile blanc)
-      fillOpacity: isVisited ? 0 : 0.4,
+      fillOpacity: isVisited ? 0.2 : 0,
       color: "#191919",
       // Si visité : bordure visible (1). Si pas visité : bordure discrète (0.1)
-      opacity: isVisited ? 1 : 0.1,
+      opacity: isVisited ? 1 : 0.4,
       weight: 1
     };
   };
+
+  const worldStyle = (feature) => {
+    const name = feature.properties.name;
+
+    if (name === "France") {
+      return {
+        fillOpacity: 0,
+        opacity: 0
+      };
+    }
+
+    if (isEuropeanCountry(feature)) {
+      return {
+        fillColor: "#000000",
+        fillOpacity: 0.25,
+        color: "#000000",
+        weight: 1,
+        opacity: 0.4
+      };
+    }
+
+    // Hors Europe → totalement invisible
+    return {
+      fillOpacity: 0,
+      opacity: 0
+    };
+  };
+
+
 
   // 2. LES INTERACTIONS (Ton survol d'origine)
   const onEachFeature = (feature, layer) => {
@@ -145,8 +197,8 @@ function MapView() {
         e.target.setStyle({
           weight: 1,
           color: "#191919",
-          opacity: isVisited ? 1 : 0.1, // On rétablit l'opacité du bord
-          fillOpacity: isVisited ? 0 : 0.4 // On rétablit l'opacité du fond
+          opacity: isVisited ? 1 : 0.4, // On rétablit l'opacité du bord
+          fillOpacity: isVisited ? 0.2 : 0 // On rétablit l'opacité du fond
         });
       }
     });
@@ -331,8 +383,26 @@ function MapView() {
         </div>
       )}
 
-      <MapContainer center={[46.6, 2.5]} zoom={6} style={{ height: "100vh", width: "100%" }}>
+      <MapContainer
+        center={[46.6, 2.5]}
+        zoom={6}
+        minZoom={4}
+        maxBounds={[
+          [30, -15],   // Sud-Ouest (Atlantique / Maroc)
+          [65, 25]     // Nord-Est (Scandinavie / Europe Est)
+        ]}
+        maxBoundsViscosity={1.0}
+        style={{ height: "100vh", width: "100%" }}
+      >
         <TileLayer attribution="&copy; OpenStreetMap" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        {worldData && (
+          <GeoJSON
+            data={worldData}
+            style={worldStyle}
+            interactive={false} // important → ne bloque pas les clics
+          />
+        )}
+
 
         {/* Composant qui gère le clic sur le fond de carte */}
         <MapClickHandler onMapClick={openAddModal} />
