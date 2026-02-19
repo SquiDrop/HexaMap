@@ -28,7 +28,7 @@ function MapView() {
 
   // --- STATES DONNÉES ---
   // On ne stocke plus 'visitedDepartments'. C'est calculé automatiquement.
-  
+
   const [categories, setCategories] = useState(() => {
     const saved = localStorage.getItem("tripCategories");
     return saved ? JSON.parse(saved) : [
@@ -43,19 +43,19 @@ function MapView() {
     return saved
       ? JSON.parse(saved)
       : [
-          { 
-            name: "ENSC", 
-            coords: [44.8153, -0.5742], 
-            comment: "L'école !", 
-            category: { name: "Solo / Boulot", color: "#2980b9" } 
-          },
-        ];
+        {
+          name: "ENSC",
+          coords: [44.8153, -0.5742],
+          comment: "L'école !",
+          category: { name: "Solo / Boulot", color: "#2980b9" }
+        },
+      ];
   });
 
   // --- STATES UI ---
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [newPlaceModal, setNewPlaceModal] = useState({ isOpen: false, coords: null, editIndex: null });
-  
+
   // Formulaire
   const [formName, setFormName] = useState("");
   const [formComment, setFormComment] = useState("");
@@ -77,15 +77,15 @@ function MapView() {
   // à la volée en regardant les lieux. Plus besoin de le stocker manuellement.
   const activeDepartments = useMemo(() => {
     if (!departementsData) return [];
-    
+
     // On crée un Set (liste unique) des codes départements trouvés
     const foundCodes = new Set();
-    
+
     visitedPlaces.forEach(place => {
       const code = getDepartmentCodeFromCoords(place.coords[0], place.coords[1]);
       if (code) foundCodes.add(code);
     });
-    
+
     return Array.from(foundCodes);
   }, [visitedPlaces, departementsData]); // Se recalcule uniquement quand lieux ou carte changent
 
@@ -96,7 +96,7 @@ function MapView() {
   // --- PERSISTENCE ---
   useEffect(() => { localStorage.setItem("visitedPlaces", JSON.stringify(visitedPlaces)); }, [visitedPlaces]);
   useEffect(() => { localStorage.setItem("tripCategories", JSON.stringify(categories)); }, [categories]);
-  
+
   // Note : On ne sauvegarde plus "visitedDepartments" dans le localStorage, car c'est dynamique.
 
   useEffect(() => {
@@ -120,7 +120,7 @@ function MapView() {
     return {
       fillColor: isVisited ? "#91ea94" : "#ffffff",
       // Si visité : 0 (transparent) pour voir la carte. Si pas visité : 0.4 (voile blanc)
-      fillOpacity: isVisited ? 0 : 0.4, 
+      fillOpacity: isVisited ? 0 : 0.4,
       color: "#191919",
       // Si visité : bordure visible (1). Si pas visité : bordure discrète (0.1)
       opacity: isVisited ? 1 : 0.1,
@@ -142,11 +142,11 @@ function MapView() {
       mouseout: (e) => {
         // En sortant : on remet le style EXACT selon l'état (visité ou non)
         const isVisited = activeDepartments.includes(feature.properties.code);
-        e.target.setStyle({ 
-            weight: 1, 
-            color: "#191919",
-            opacity: isVisited ? 1 : 0.1, // On rétablit l'opacité du bord
-            fillOpacity: isVisited ? 0 : 0.4 // On rétablit l'opacité du fond
+        e.target.setStyle({
+          weight: 1,
+          color: "#191919",
+          opacity: isVisited ? 1 : 0.1, // On rétablit l'opacité du bord
+          fillOpacity: isVisited ? 0 : 0.4 // On rétablit l'opacité du fond
         });
       }
     });
@@ -160,10 +160,10 @@ function MapView() {
     setFormComment(placeToEdit.comment);
     const matchingCategory = categories.find(c => c.name === placeToEdit.category?.name);
     setFormCategoryId(matchingCategory ? matchingCategory.id : "");
-    setNewPlaceModal({ 
-        isOpen: true, 
-        coords: placeToEdit.coords, 
-        editIndex: index 
+    setNewPlaceModal({
+      isOpen: true,
+      coords: placeToEdit.coords,
+      editIndex: index
     });
   };
 
@@ -180,12 +180,12 @@ function MapView() {
     };
 
     if (newPlaceModal.editIndex !== null) {
-        const updatedPlaces = [...visitedPlaces];
-        updatedPlaces[newPlaceModal.editIndex] = placeData;
-        setVisitedPlaces(updatedPlaces);
+      const updatedPlaces = [...visitedPlaces];
+      updatedPlaces[newPlaceModal.editIndex] = placeData;
+      setVisitedPlaces(updatedPlaces);
     } else {
-        setVisitedPlaces(prev => [...prev, placeData]);
-        // Note: Plus besoin de mettre à jour visitedDepartments ici, c'est automatique !
+      setVisitedPlaces(prev => [...prev, placeData]);
+      // Note: Plus besoin de mettre à jour visitedDepartments ici, c'est automatique !
     }
 
     setNewPlaceModal({ isOpen: false, coords: null, editIndex: null });
@@ -202,7 +202,7 @@ function MapView() {
   };
 
   const addCategory = (name, color) => {
-    if(!name) return;
+    if (!name) return;
     const newCat = { id: Date.now(), name, color };
     setCategories([...categories, newCat]);
   };
@@ -235,7 +235,7 @@ function MapView() {
         <div style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "8px" }}>
           {visitedCount} / {totalDepartments}
         </div>
-        <button 
+        <button
           onClick={() => setShowCategoryManager(!showCategoryManager)}
           style={{ background: "#2e1e69", color: "white", border: "none", padding: "6px 10px", borderRadius: "4px", cursor: "pointer", fontSize: "12px" }}
         >
@@ -257,7 +257,7 @@ function MapView() {
                   <span style={{ width: "12px", height: "12px", borderRadius: "50%", background: cat.color, marginRight: "8px" }}></span>
                   <span>{cat.name}</span>
                 </div>
-                <button 
+                <button
                   onClick={() => deleteCategory(cat.id)}
                   style={{ background: "transparent", color: "#999", border: "none", cursor: "pointer", fontWeight: "bold", fontSize: "14px", padding: "0 5px" }}
                 >
@@ -265,18 +265,18 @@ function MapView() {
                 </button>
               </li>
             ))}
-             {categories.length === 0 && <li style={{ fontSize: "12px", color: "#999", fontStyle: "italic" }}>Aucune catégorie.</li>}
+            {categories.length === 0 && <li style={{ fontSize: "12px", color: "#999", fontStyle: "italic" }}>Aucune catégorie.</li>}
           </ul>
           <div style={{ borderTop: "1px solid #eee", paddingTop: "10px" }}>
             <div style={{ fontSize: "12px", marginBottom: "5px" }}>Nouveau type :</div>
             <form onSubmit={(e) => {
-                e.preventDefault();
-                addCategory(e.target.catName.value, e.target.catColor.value);
-                e.target.reset();
+              e.preventDefault();
+              addCategory(e.target.catName.value, e.target.catColor.value);
+              e.target.reset();
             }}>
-                <input name="catName" placeholder="Ex: Roadtrip..." style={{ width: "60%", marginRight: "5px", padding: "4px" }} required />
-                <input name="catColor" type="color" defaultValue="#ff0000" style={{ width: "20%", height: "26px", border: "none", verticalAlign: "bottom", padding: 0, cursor: "pointer" }} />
-                <button type="submit" style={{ width: "100%", marginTop: "8px", background: "#27ae60", color: "white", border: "none", padding: "5px", cursor: "pointer", borderRadius: "3px" }}>Ajouter</button>
+              <input name="catName" placeholder="Ex: Roadtrip..." style={{ width: "60%", marginRight: "5px", padding: "4px" }} required />
+              <input name="catColor" type="color" defaultValue="#ff0000" style={{ width: "20%", height: "26px", border: "none", verticalAlign: "bottom", padding: 0, cursor: "pointer" }} />
+              <button type="submit" style={{ width: "100%", marginTop: "8px", background: "#27ae60", color: "white", border: "none", padding: "5px", cursor: "pointer", borderRadius: "3px" }}>Ajouter</button>
             </form>
           </div>
         </div>
@@ -284,91 +284,91 @@ function MapView() {
 
       {newPlaceModal.isOpen && (
         <div style={{
-            position: "absolute", top: "0", left: "0", width: "100%", height: "100%",
-            zIndex: 2000, background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center"
+          position: "absolute", top: "0", left: "0", width: "100%", height: "100%",
+          zIndex: 2000, background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center"
         }}>
-            <div style={{ background: "white", padding: "20px", borderRadius: "8px", width: "320px", fontFamily: "Arial" }}>
-                <h3 style={{ marginTop: 0 }}>
-                    {newPlaceModal.editIndex !== null ? "Modifier le lieu ✏️" : "Nouveau souvenir 📍"}
-                </h3>
-                
-                <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>Nom du lieu</label>
-                <input 
-                    type="text" 
-                    value={formName} 
-                    onChange={(e) => setFormName(e.target.value)}
-                    style={{ width: "100%", padding: "8px", marginBottom: "12px", boxSizing: "border-box" }}
-                    autoFocus
-                />
+          <div style={{ background: "white", padding: "20px", borderRadius: "8px", width: "320px", fontFamily: "Arial" }}>
+            <h3 style={{ marginTop: 0 }}>
+              {newPlaceModal.editIndex !== null ? "Modifier le lieu ✏️" : "Nouveau souvenir 📍"}
+            </h3>
 
-                <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>Commentaire</label>
-                <textarea 
-                    value={formComment} 
-                    onChange={(e) => setFormComment(e.target.value)}
-                    placeholder="Avec qui ? Quel souvenir ?"
-                    style={{ width: "100%", padding: "8px", marginBottom: "12px", height: "60px", boxSizing: "border-box" }}
-                />
+            <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>Nom du lieu</label>
+            <input
+              type="text"
+              value={formName}
+              onChange={(e) => setFormName(e.target.value)}
+              style={{ width: "100%", padding: "8px", marginBottom: "12px", boxSizing: "border-box" }}
+              autoFocus
+            />
 
-                <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>Type de voyage</label>
-                <select 
-                    value={formCategoryId} 
-                    onChange={(e) => setFormCategoryId(e.target.value)}
-                    style={{ width: "100%", padding: "8px", marginBottom: "20px" }}
-                >
-                    <option value="">-- Choisir une catégorie --</option>
-                    {categories.map(cat => (
-                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
-                </select>
+            <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>Commentaire</label>
+            <textarea
+              value={formComment}
+              onChange={(e) => setFormComment(e.target.value)}
+              placeholder="Avec qui ? Quel souvenir ?"
+              style={{ width: "100%", padding: "8px", marginBottom: "12px", height: "60px", boxSizing: "border-box" }}
+            />
 
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <button onClick={() => setNewPlaceModal({ isOpen: false, coords: null, editIndex: null })} style={{ background: "#ccc", border: "none", padding: "8px 15px", borderRadius: "4px", cursor: "pointer" }}>Annuler</button>
-                    <button onClick={saveNewPlace} style={{ background: "#2e1e69", color: "white", border: "none", padding: "8px 15px", borderRadius: "4px", cursor: "pointer" }}>
-                        {newPlaceModal.editIndex !== null ? "Mettre à jour" : "Enregistrer"}
-                    </button>
-                </div>
+            <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>Type de voyage</label>
+            <select
+              value={formCategoryId}
+              onChange={(e) => setFormCategoryId(e.target.value)}
+              style={{ width: "100%", padding: "8px", marginBottom: "20px" }}
+            >
+              <option value="">-- Choisir une catégorie --</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <button onClick={() => setNewPlaceModal({ isOpen: false, coords: null, editIndex: null })} style={{ background: "#ccc", border: "none", padding: "8px 15px", borderRadius: "4px", cursor: "pointer" }}>Annuler</button>
+              <button onClick={saveNewPlace} style={{ background: "#2e1e69", color: "white", border: "none", padding: "8px 15px", borderRadius: "4px", cursor: "pointer" }}>
+                {newPlaceModal.editIndex !== null ? "Mettre à jour" : "Enregistrer"}
+              </button>
             </div>
+          </div>
         </div>
       )}
 
       <MapContainer center={[46.6, 2.5]} zoom={6} style={{ height: "100vh", width: "100%" }}>
         <TileLayer attribution="&copy; OpenStreetMap" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        
+
         {/* Composant qui gère le clic sur le fond de carte */}
         <MapClickHandler onMapClick={openAddModal} />
 
         {departementsData && (
-          <GeoJSON 
-            data={departementsData} 
-            style={style} 
-            onEachFeature={onEachFeature} 
+          <GeoJSON
+            data={departementsData}
+            style={style}
+            onEachFeature={onEachFeature}
             // On utilise la liste activeDepartments pour forcer le re-rendu quand ça change
-            key={activeDepartments.join(',')} 
+            key={activeDepartments.join(',')}
           />
         )}
 
         {visitedPlaces.map((place, idx) => (
-          <Marker 
-            key={idx} 
-            position={place.coords} 
-            icon={createCustomIcon(place.category?.color || "#333")} 
+          <Marker
+            key={idx}
+            position={place.coords}
+            icon={createCustomIcon(place.category?.color || "#333")}
           >
             <Popup>
               <div style={{ fontFamily: "Arial", textAlign: "center", minWidth: "150px" }}>
                 <strong style={{ fontSize: "14px" }}>{place.name}</strong>
-                <div style={{ 
-                    marginTop: "6px", marginBottom: "6px", 
-                    display: "inline-block", padding: "2px 8px", borderRadius: "12px", 
-                    background: place.category?.color || "#eee", color: "white", fontSize: "11px", fontWeight: "bold" 
+                <div style={{
+                  marginTop: "6px", marginBottom: "6px",
+                  display: "inline-block", padding: "2px 8px", borderRadius: "12px",
+                  background: place.category?.color || "#eee", color: "white", fontSize: "11px", fontWeight: "bold"
                 }}>
-                    {place.category?.name || "Inconnu"}
+                  {place.category?.name || "Inconnu"}
                 </div>
                 <div style={{ fontSize: "13px", fontStyle: "italic", color: "#555", marginBottom: "10px" }}>
                   "{place.comment}"
                 </div>
                 <div style={{ display: "flex", gap: "5px", justifyContent: "center" }}>
-                    <button onClick={() => handleEdit(idx)} style={{ background: "#3498db", color: "white", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "11px" }}>Modifier</button>
-                    <button onClick={() => removePlace(idx)} style={{ background: "#e74c3c", color: "white", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "11px" }}>Supprimer</button>
+                  <button onClick={() => handleEdit(idx)} style={{ background: "#3498db", color: "white", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "11px" }}>Modifier</button>
+                  <button onClick={() => removePlace(idx)} style={{ background: "#e74c3c", color: "white", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "11px" }}>Supprimer</button>
                 </div>
               </div>
             </Popup>
