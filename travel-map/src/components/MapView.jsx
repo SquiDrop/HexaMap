@@ -32,9 +32,18 @@ function MapView() {
   const [categories, setCategories] = useState(() => {
     const saved = localStorage.getItem("tripCategories");
     return saved ? JSON.parse(saved) : [
-      { id: 1, name: "Vacances Famille", color: "#27ae60" },
-      { id: 2, name: "Week-end Potes", color: "#e74c3c" },
-      { id: 3, name: "Solo / Boulot", color: "#2980b9" }
+      { id: 1, name: "Escapade romantique", color: "#E63946" },
+      { id: 2, name: "Week-end entre potes", color: "#db6591" },
+      { id: 3, name: "Culture & Patrimoine", color: "#8E44AD" },
+      { id: 4, name: "Voyage Solo", color: "#3949AB" },
+      { id: 5, name: "Vacances à la mer", color: "#1E88E5" },
+      { id: 6, name: "Découverte & Roadtrip", color: "#00897B" },
+      { id: 7, name: "Rando & Nature", color: "#43A047" },
+      { id: 8, name: "Gastronomie & Terroir", color: "#F4511E" },
+      { id: 9, name: "Famille & Maison", color: "#6D4C41" },
+      { id: 10, name: "Déplacement pro", color: "#546E7A" },
+      { id: 11, name: "Ski & Montagne", color: "#0097A7" },
+      { id: 12, name: "Coins à cèpes", color: "#C08552" }
     ];
   });
 
@@ -66,9 +75,9 @@ function MapView() {
       "Croatia", "Bosnia and Herz.", "Serbia", "Montenegro", "Albania",
       "Greece", "Bulgaria", "Romania", "Norway", "Sweden", "Finland",
       "Czech Republic", "Bosnia and Herzegovina", "Kosovo", "Republic of Serbia",
-      "Macedonia", "Morocco", "Algeria", "Libya", "Tunisia", "Russia", "Ukraine", 
+      "Macedonia", "Morocco", "Algeria", "Libya", "Tunisia", "Russia", "Ukraine",
       "Moldova", "Latvia", "Lithuania", "Estonia", "Belarus", "Egypt", "Syria",
-      "Israel", "Jordan", "Turkey"
+      "Israel", "Jordan", "Turkey", "Lebanon", "Palestine"
     ];
 
     return nearbyCountries.includes(feature.properties.name);
@@ -433,7 +442,7 @@ function MapView() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: "6px"     
+                gap: "6px"
               }}>
 
                 <strong style={{ fontSize: "14px" }}>{place.name}</strong>
