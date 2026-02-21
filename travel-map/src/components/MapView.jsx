@@ -56,21 +56,23 @@ function MapView() {
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [newPlaceModal, setNewPlaceModal] = useState({ isOpen: false, coords: null, editIndex: null });
 
-  //Europe
+  //Pays grisés autour de la France
   const [worldData, setWorldData] = useState(null);
-  const isEuropeanCountry = (feature) => {
-  const europeCountries = [
-    "Spain","Portugal","Italy","Belgium","Netherlands","Germany",
-    "Switzerland","Austria","United Kingdom","Ireland","Luxembourg",
-    "Denmark","Poland","Czechia","Slovakia","Hungary","Slovenia",
-    "Croatia","Bosnia and Herz.","Serbia","Montenegro","Albania",
-    "Greece","Bulgaria","Romania","Norway","Sweden","Finland", 
-    "Czech Republic", "Bosnia and Herzegovina", "Kosovo", "Republic of Serbia",
-    "Macedonia", "Morocco", "Algeria", "Libya", "Tunisia", "Russia"
-  ];
+  const isNearbyCountry = (feature) => {
+    const nearbyCountries = [
+      "Spain", "Portugal", "Italy", "Belgium", "Netherlands", "Germany",
+      "Switzerland", "Austria", "United Kingdom", "Ireland", "Luxembourg",
+      "Denmark", "Poland", "Czechia", "Slovakia", "Hungary", "Slovenia",
+      "Croatia", "Bosnia and Herz.", "Serbia", "Montenegro", "Albania",
+      "Greece", "Bulgaria", "Romania", "Norway", "Sweden", "Finland",
+      "Czech Republic", "Bosnia and Herzegovina", "Kosovo", "Republic of Serbia",
+      "Macedonia", "Morocco", "Algeria", "Libya", "Tunisia", "Russia", "Ukraine", 
+      "Moldova", "Latvia", "Lithuania", "Estonia", "Belarus", "Egypt", "Syria",
+      "Israel", "Jordan", "Turkey"
+    ];
 
-  return europeCountries.includes(feature.properties.name);
-};
+    return nearbyCountries.includes(feature.properties.name);
+  };
 
 
   // Formulaire
@@ -141,7 +143,7 @@ function MapView() {
   const style = (feature) => {
     const isVisited = activeDepartments.includes(feature.properties.code);
     return {
-      fillColor: isVisited ? "#4bbb83" : "#ffffff",
+      fillColor: isVisited ? "#0400ff" : "#ffffff",
       // Si visité : 0 (transparent) pour voir la carte. Si pas visité : 0.4 (voile blanc)
       fillOpacity: isVisited ? 0.2 : 0,
       color: "#191919",
@@ -161,7 +163,7 @@ function MapView() {
       };
     }
 
-    if (isEuropeanCountry(feature)) {
+    if (isNearbyCountry(feature)) {
       return {
         fillColor: "#000000",
         fillOpacity: 0.25,
@@ -283,13 +285,13 @@ function MapView() {
         background: "white", padding: "10px 14px", borderRadius: "8px",
         boxShadow: "0 2px 8px rgba(0,0,0,0.15)", textAlign: "right", fontFamily: "Arial"
       }}>
-        <div style={{ fontSize: "14px", fontWeight: "bold", color: "#555" }}>Départements</div>
-        <div style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "8px" }}>
+        <div style={{ fontSize: "30px", fontWeight: "bold", color: "#555" }}>Départements</div>
+        <div style={{ fontSize: "54px", fontWeight: "bold", marginBottom: "8px" }}>
           {visitedCount} / {totalDepartments}
         </div>
         <button
           onClick={() => setShowCategoryManager(!showCategoryManager)}
-          style={{ background: "#2e1e69", color: "white", border: "none", padding: "6px 10px", borderRadius: "4px", cursor: "pointer", fontSize: "12px" }}
+          style={{ background: "#2e1e69", color: "white", border: "none", padding: "6px 10px", borderRadius: "4px", cursor: "pointer", fontSize: "30px" }}
         >
           🎨 Gérer types de voyages
         </button>
@@ -424,12 +426,20 @@ function MapView() {
             icon={createCustomIcon(place.category?.color || "#333")}
           >
             <Popup>
-              <div style={{ fontFamily: "Arial", textAlign: "center", minWidth: "150px" }}>
+              <div style={{
+                fontFamily: "Arial",
+                textAlign: "center",
+                minWidth: "150px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "6px"     
+              }}>
+
                 <strong style={{ fontSize: "14px" }}>{place.name}</strong>
                 <div style={{
-                  marginTop: "6px", marginBottom: "6px",
                   display: "inline-block", padding: "2px 8px", borderRadius: "12px",
-                  background: place.category?.color || "#eee", color: "white", fontSize: "11px", fontWeight: "bold"
+                  background: place.category?.color || "#eee", color: "#f8ebeb", fontSize: "11px", fontWeight: "bold"
                 }}>
                   {place.category?.name || "Inconnu"}
                 </div>
