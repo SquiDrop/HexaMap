@@ -77,7 +77,8 @@ function MapView() {
       "Czech Republic", "Bosnia and Herzegovina", "Kosovo", "Republic of Serbia",
       "Macedonia", "Morocco", "Algeria", "Libya", "Tunisia", "Russia", "Ukraine",
       "Moldova", "Latvia", "Lithuania", "Estonia", "Belarus", "Egypt", "Syria",
-      "Israel", "Jordan", "Turkey", "Lebanon", "Palestine"
+      "Israel", "Jordan", "Turkey", "Lebanon", "Palestine", "Saudi Arabia",
+      "Iraq", "Armenia", "Azerbaijan", "Georgia", "Iran"
     ];
 
     return nearbyCountries.includes(feature.properties.name);
