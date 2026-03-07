@@ -1,11 +1,10 @@
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from "react-leaflet";
 import { useMapEvents } from "react-leaflet";
-import { useEffect, useState, useMemo } from "react"; // Ajout de useMemo pour la perf
+import { useEffect, useState, useMemo } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import * as turf from "@turf/turf";
 
-// --- ICONES ---
 const createCustomIcon = (color) => {
   return L.divIcon({
     className: "custom-marker",
@@ -26,8 +25,6 @@ const createCustomIcon = (color) => {
 function MapView() {
   const [departementsData, setDepartementsData] = useState(null);
 
-  // --- STATES DONNÉES ---
-  // On ne stocke plus 'visitedDepartments'. C'est calculé automatiquement.
 
   const [categories, setCategories] = useState(() => {
     const saved = localStorage.getItem("tripCategories");
@@ -61,7 +58,6 @@ function MapView() {
       ];
   });
 
-  // --- STATES UI ---
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [newPlaceModal, setNewPlaceModal] = useState({ isOpen: false, coords: null, editIndex: null });
 
@@ -85,14 +81,10 @@ function MapView() {
   };
 
 
-  // Formulaire
   const [formName, setFormName] = useState("");
   const [formComment, setFormComment] = useState("");
   const [formCategoryId, setFormCategoryId] = useState("");
 
-  // --- LOGIQUE METIER (CALCULS) ---
-
-  // Fonction utilitaire pour trouver le code département via coords
   const getDepartmentCodeFromCoords = (lat, lng) => {
     if (!departementsData) return null;
     const point = turf.point([lng, lat]);
@@ -102,12 +94,9 @@ function MapView() {
     return null;
   };
 
-  // C'est ici que la magie opère : on calcule la liste des départements visités
-  // à la volée en regardant les lieux. Plus besoin de le stocker manuellement.
   const activeDepartments = useMemo(() => {
     if (!departementsData) return [];
 
-    // On crée un Set (liste unique) des codes départements trouvés
     const foundCodes = new Set();
 
     visitedPlaces.forEach(place => {
@@ -116,17 +105,14 @@ function MapView() {
     });
 
     return Array.from(foundCodes);
-  }, [visitedPlaces, departementsData]); // Se recalcule uniquement quand lieux ou carte changent
+  }, [visitedPlaces, departementsData]); 
 
 
   const totalDepartments = departementsData ? departementsData.features.length : 0;
-  const visitedCount = activeDepartments.length; // On utilise la liste calculée
+  const visitedCount = activeDepartments.length; 
 
-  // --- PERSISTENCE ---
   useEffect(() => { localStorage.setItem("visitedPlaces", JSON.stringify(visitedPlaces)); }, [visitedPlaces]);
   useEffect(() => { localStorage.setItem("tripCategories", JSON.stringify(categories)); }, [categories]);
-
-  // Note : On ne sauvegarde plus "visitedDepartments" dans le localStorage, car c'est dynamique.
 
   useEffect(() => {
     fetch("/departements.geojson")
@@ -141,7 +127,6 @@ function MapView() {
   }, []);
 
 
-  // --- GESTION DU CLIC POUR AJOUTER (Centralisé) ---
   const openAddModal = (lat, lng) => {
     setNewPlaceModal({ isOpen: true, coords: [lat, lng], editIndex: null });
     setFormName("");
@@ -149,15 +134,12 @@ function MapView() {
     setFormCategoryId(categories[0]?.id || "");
   };
 
-  // 1. LE STYLE (Ton style d'origine)
   const style = (feature) => {
     const isVisited = activeDepartments.includes(feature.properties.code);
     return {
       fillColor: isVisited ? "#0400ff" : "#ffffff",
-      // Si visité : 0 (transparent) pour voir la carte. Si pas visité : 0.4 (voile blanc)
       fillOpacity: isVisited ? 0.2 : 0,
       color: "#191919",
-      // Si visité : bordure visible (1). Si pas visité : bordure discrète (0.1)
       opacity: isVisited ? 1 : 0.4,
       weight: 1
     };
@@ -183,7 +165,6 @@ function MapView() {
       };
     }
 
-    // Hors Europe → totalement invisible
     return {
       fillOpacity: 0,
       opacity: 0
@@ -192,31 +173,26 @@ function MapView() {
 
 
 
-  // 2. LES INTERACTIONS (Ton survol d'origine)
   const onEachFeature = (feature, layer) => {
     layer.on({
       click: (e) => {
-        // On garde la nouvelle logique : clic = ajout de lieu
         openAddModal(e.latlng.lat, e.latlng.lng);
       },
       mouseover: (e) => {
-        // Au survol : on épaissit juste la bordure et on change sa couleur
         e.target.setStyle({ weight: 3, color: "#2e1e69" });
       },
       mouseout: (e) => {
-        // En sortant : on remet le style EXACT selon l'état (visité ou non)
         const isVisited = activeDepartments.includes(feature.properties.code);
         e.target.setStyle({
           weight: 1,
           color: "#191919",
-          opacity: isVisited ? 1 : 0.4, // On rétablit l'opacité du bord
-          fillOpacity: isVisited ? 0.2 : 0 // On rétablit l'opacité du fond
+          opacity: isVisited ? 1 : 0.4, 
+          fillOpacity: isVisited ? 0.2 : 0 
         });
       }
     });
   };
 
-  // --- ACTIONS ---
 
   const handleEdit = (index) => {
     const placeToEdit = visitedPlaces[index];
@@ -249,7 +225,6 @@ function MapView() {
       setVisitedPlaces(updatedPlaces);
     } else {
       setVisitedPlaces(prev => [...prev, placeData]);
-      // Note: Plus besoin de mettre à jour visitedDepartments ici, c'est automatique !
     }
 
     setNewPlaceModal({ isOpen: false, coords: null, editIndex: null });
@@ -261,7 +236,6 @@ function MapView() {
   const removePlace = (indexToRemove) => {
     if (window.confirm("Supprimer ce lieu ?")) {
       setVisitedPlaces(prev => prev.filter((_, index) => index !== indexToRemove));
-      // Note: Si c'était le dernier lieu du département, le département redeviendra blanc automatiquement.
     }
   };
 
@@ -277,11 +251,9 @@ function MapView() {
     }
   };
 
-  // Composant pour clic sur la carte (hors départements, ex: océan)
   function MapClickHandler({ onMapClick }) {
     useMapEvents({
       click(e) {
-        // SIMPLIFICATION : Plus de shiftKey check. Clic simple = Ajout.
         onMapClick(e.latlng.lat, e.latlng.lng);
       }
     });
@@ -411,12 +383,11 @@ function MapView() {
           <GeoJSON
             data={worldData}
             style={worldStyle}
-            interactive={false} // important → ne bloque pas les clics
+            interactive={false} 
           />
         )}
 
 
-        {/* Composant qui gère le clic sur le fond de carte */}
         <MapClickHandler onMapClick={openAddModal} />
 
         {departementsData && (
@@ -424,7 +395,6 @@ function MapView() {
             data={departementsData}
             style={style}
             onEachFeature={onEachFeature}
-            // On utilise la liste activeDepartments pour forcer le re-rendu quand ça change
             key={activeDepartments.join(',')}
           />
         )}

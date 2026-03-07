@@ -1,12 +1,9 @@
 import React from 'react';
-// 1. IMPORTE TON IMAGE ICI
-// Assure-toi que le chemin correspond à l'endroit où tu as mis ton fichier
 import franceBorders from "../assets/france_border.png";
 
 function LandingPage({ onStart }) {
   return (
     <div className="landing-container">
-      {/* 2. STYLE CSS MODIFIÉ POUR LE FOND */}
       <style>
         {`
           .landing-container {
