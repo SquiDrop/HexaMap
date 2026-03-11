@@ -1,114 +1,104 @@
-import React from 'react';
 import franceBorders from "../assets/france_border.png";
 
 function LandingPage({ onStart }) {
   return (
     <div className="landing-container">
-      <style>
-        {`
-          .landing-container {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #333;
-            min-height: 100vh;
-            position: relative;
-            overflow: hidden;
-            background-color: #fcfcfc; 
-          }
+      <style>{`
+        .landing-container {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          color: #333;
+          min-height: 100vh;
+          position: relative;
+          overflow: hidden;
+          background-color: #fcfcfc;
+        }
+        .landing-container::before {
+          content: "";
+          position: absolute;
+          top: 0; left: 0;
+          width: 100%; height: 100%;
+          background-image: url('${franceBorders}');
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: contain;
+          opacity: 0.1;
+          z-index: 0;
+          background-attachment: fixed;
+        }
+        .hero-section, .features-section, .inspiration-section {
+          position: relative;
+          z-index: 1;
+          background: transparent;
+        }
+        .hero-section {
+          text-align: center;
+          padding: 80px 20px;
+        }
+        .hero-title {
+          font-size: 4rem;
+          font-weight: 900;
+          color: #1e88e5;
+          margin-bottom: 10px;
+          letter-spacing: 2px;
+        }
+        .hero-subtitle {
+          font-size: 1.5rem;
+          color: #555;
+          margin-bottom: 40px;
+        }
+        .btn-start {
+          background-color: #e63946;
+          color: white;
+          border: none;
+          padding: 15px 40px;
+          font-size: 1.2rem;
+          font-weight: bold;
+          border-radius: 30px;
+          cursor: pointer;
+          box-shadow: 0 4px 15px rgba(230, 57, 70, 0.4);
+          transition: transform 0.2s;
+        }
+        .btn-start:hover {
+          transform: scale(1.05);
+        }
+        .features-section {
+          display: flex;
+          justify-content: space-around;
+          flex-wrap: wrap;
+          padding: 10px 10%;
+          gap: 20px;
+        }
+        .feature-card {
+          background: rgba(255, 255, 255, 0.9);
+          padding: 20px;
+          border-radius: 15px;
+          width: 250px;
+          text-align: center;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .feature-icon {
+          font-size: 2.5rem;
+          margin-bottom: 15px;
+        }
+        .inspiration-section {
+          padding: 40px 10%;
+          text-align: center;
+        }
+        .gallery {
+          display: flex;
+          gap: 15px;
+          justify-content: center;
+          margin-top: 30px;
+        }
+        .gallery img {
+          width: 300px;
+          height: 200px;
+          object-fit: cover;
+          border-radius: 10px;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+      `}</style>
 
-
-          .landing-container::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('${franceBorders}');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain; 
-            opacity: 0.1; 
-            z-index: 0; 
-            background-attachment: fixed;
-          }
-
-    
-          .hero-section, .features-section, .inspiration-section {
-            position: relative;
-            z-index: 1; 
-            background: transparent 
-          }
-
-          .hero-section {
-            text-align: center;
-            padding: 80px 20px;
-          }
-          .hero-title {
-            font-size: 4rem;
-            font-weight: 900;
-            color: #1e88e5;
-            margin-bottom: 10px;
-            letter-spacing: 2px;
-          }
-          .hero-subtitle {
-            font-size: 1.5rem;
-            color: #555;
-            margin-bottom: 40px;
-          }
-          .btn-start {
-            background-color: #e63946;
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(230, 57, 70, 0.4);
-            transition: transform 0.2s;
-          }
-          .btn-start:hover {
-            transform: scale(1.05);
-          }
-          .features-section {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            padding: 10px 10%;
-            gap: 20px;
-          }
-          .feature-card {
-            background: rgba(255, 255, 255, 0.9); 
-            padding: 20px;
-            border-radius: 15px;
-            width: 250px;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-          }
-          .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-          }
-          .inspiration-section {
-            padding: 40px 10%;
-            text-align: center;
-          }
-          .gallery {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 30px;
-           
-          }
-          .gallery img {
-            width: 300px;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-          }
-        `}
-      </style>
       <header className="hero-section">
         <h1 className="hero-title">HEXAMAP</h1>
         <p className="hero-subtitle">Retracez vos voyages. Collectionnez vos souvenirs. Redécouvrez la France.</p>
@@ -138,10 +128,10 @@ function LandingPage({ onStart }) {
       <section className="inspiration-section">
         <h2>Tant de lieux restent à découvrir...</h2>
         <div className="gallery">
-          <img src="https://images.unsplash.com/photo-1596436831831-87dd84a69101?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Mont Saint-Michel" />
+          <img src="https://images.unsplash.com/photo-1596436831831-87dd84a69101?q=80&w=1171&auto=format&fit=crop" alt="Mont Saint-Michel" />
           <img src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=800&q=80" alt="Paris" />
           <img src="https://cdn.sanity.io/images/nxpteyfv/goguides/f9425b45caa8898eac9e7eba91d61aa278a28cb6-1600x1067.jpg" alt="Annecy" />
-          <img src="https://www.pyrenees-trip.com/uploads/2018/06/1Cirque-de-gavarnie-Classic-2.jpg" alt="Cirque de Gavarnie"/>
+          <img src="https://www.pyrenees-trip.com/uploads/2018/06/1Cirque-de-gavarnie-Classic-2.jpg" alt="Cirque de Gavarnie" />
         </div>
       </section>
     </div>

@@ -1,404 +1,187 @@
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from "react-leaflet";
-import { useMapEvents } from "react-leaflet";
 import { useEffect, useState, useMemo } from "react";
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import * as turf from "@turf/turf";
 
-const createCustomIcon = (color) => {
-  return L.divIcon({
-    className: "custom-marker",
-    html: `<div style="
-      background-color: ${color};
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      border: 2px solid white;
-      box-shadow: 0 0 4px rgba(0,0,0,0.5);
-    "></div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    popupAnchor: [0, -12],
-  });
-};
+import {
+  createCustomIcon,
+  getWorldStyle,
+  getDepartmentStyle,
+  getRegionStyle,
+  getActiveRegions,
+  REGIONS_META,
+} from "../utils/mapUtils";
+import { useVisitedPlaces } from "../hooks/useVisitedPlaces";
+import MapClickHandler from "./MapClickHandler";
+import StatsPanel from "./StatsPanel";
+import CategoryManager from "./CategoryManager";
+import PlaceModal from "./PlaceModal";
 
 function MapView() {
   const [departementsData, setDepartementsData] = useState(null);
-
-
-  const [categories, setCategories] = useState(() => {
-    const saved = localStorage.getItem("tripCategories");
-    return saved ? JSON.parse(saved) : [
-      { id: 1, name: "Escapade romantique", color: "#E63946" },
-      { id: 2, name: "Week-end entre potes", color: "#db6591" },
-      { id: 3, name: "Culture & Patrimoine", color: "#8E44AD" },
-      { id: 4, name: "Voyage Solo", color: "#3949AB" },
-      { id: 5, name: "Vacances à la mer", color: "#1E88E5" },
-      { id: 6, name: "Découverte & Roadtrip", color: "#00897B" },
-      { id: 7, name: "Rando & Nature", color: "#43A047" },
-      { id: 8, name: "Gastronomie & Terroir", color: "#F4511E" },
-      { id: 9, name: "Famille & Maison", color: "#6D4C41" },
-      { id: 10, name: "Déplacement pro", color: "#546E7A" },
-      { id: 11, name: "Ski & Montagne", color: "#0097A7" },
-      { id: 12, name: "Coins à cèpes", color: "#C08552" }
-    ];
-  });
-
-  const [visitedPlaces, setVisitedPlaces] = useState(() => {
-    const saved = localStorage.getItem("visitedPlaces");
-    return saved
-      ? JSON.parse(saved)
-      : [
-        {
-          name: "ENSC",
-          coords: [44.8153, -0.5742],
-          comment: "L'école !",
-          category: { name: "Solo / Boulot", color: "#2980b9" }
-        },
-      ];
-  });
-
+  const [regionsData, setRegionsData]           = useState(null);
+  const [worldData, setWorldData]               = useState(null);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
-  const [newPlaceModal, setNewPlaceModal] = useState({ isOpen: false, coords: null, editIndex: null });
+  const [viewMode, setViewMode]                 = useState("departement"); // "departement" | "region"
+  const [modal, setModal] = useState({ isOpen: false, coords: null, editIndex: null });
 
-  //Pays grisés autour de la France
-  const [worldData, setWorldData] = useState(null);
-  const isNearbyCountry = (feature) => {
-    const nearbyCountries = [
-      "Spain", "Portugal", "Italy", "Belgium", "Netherlands", "Germany",
-      "Switzerland", "Austria", "United Kingdom", "Ireland", "Luxembourg",
-      "Denmark", "Poland", "Czechia", "Slovakia", "Hungary", "Slovenia",
-      "Croatia", "Bosnia and Herz.", "Serbia", "Montenegro", "Albania",
-      "Greece", "Bulgaria", "Romania", "Norway", "Sweden", "Finland",
-      "Czech Republic", "Bosnia and Herzegovina", "Kosovo", "Republic of Serbia",
-      "Macedonia", "Morocco", "Algeria", "Libya", "Tunisia", "Russia", "Ukraine",
-      "Moldova", "Latvia", "Lithuania", "Estonia", "Belarus", "Egypt", "Syria",
-      "Israel", "Jordan", "Turkey", "Lebanon", "Palestine", "Saudi Arabia",
-      "Iraq", "Armenia", "Azerbaijan", "Georgia", "Iran"
-    ];
+  const {
+    visitedPlaces,
+    categories,
+    activeDepartments,
+    addPlace,
+    updatePlace,
+    removePlace,
+    addCategory,
+    deleteCategory,
+  } = useVisitedPlaces(departementsData);
 
-    return nearbyCountries.includes(feature.properties.name);
-  };
+  // Régions complètement visitées
+  const activeRegions = useMemo(
+    () => getActiveRegions(activeDepartments),
+    [activeDepartments]
+  );
 
-
-  const [formName, setFormName] = useState("");
-  const [formComment, setFormComment] = useState("");
-  const [formCategoryId, setFormCategoryId] = useState("");
-
-  const getDepartmentCodeFromCoords = (lat, lng) => {
-    if (!departementsData) return null;
-    const point = turf.point([lng, lat]);
-    for (const feature of departementsData.features) {
-      if (turf.booleanPointInPolygon(point, feature)) return feature.properties.code;
-    }
-    return null;
-  };
-
-  const activeDepartments = useMemo(() => {
-    if (!departementsData) return [];
-
-    const foundCodes = new Set();
-
-    visitedPlaces.forEach(place => {
-      const code = getDepartmentCodeFromCoords(place.coords[0], place.coords[1]);
-      if (code) foundCodes.add(code);
-    });
-
-    return Array.from(foundCodes);
-  }, [visitedPlaces, departementsData]); 
-
-
-  const totalDepartments = departementsData ? departementsData.features.length : 0;
-  const visitedCount = activeDepartments.length; 
-
-  useEffect(() => { localStorage.setItem("visitedPlaces", JSON.stringify(visitedPlaces)); }, [visitedPlaces]);
-  useEffect(() => { localStorage.setItem("tripCategories", JSON.stringify(categories)); }, [categories]);
-
+  // Chargement GeoJSON
   useEffect(() => {
-    fetch("/departements.geojson")
-      .then((res) => res.json())
-      .then((data) => setDepartementsData(data));
+    fetch("/departements.geojson").then((r) => r.json()).then(setDepartementsData);
   }, []);
 
   useEffect(() => {
-    fetch("/world.geojson")
-      .then((res) => res.json())
-      .then((data) => setWorldData(data));
+    fetch("/regions.geojson").then((r) => r.json()).then(setRegionsData);
   }, []);
 
+  useEffect(() => {
+    fetch("/world.geojson").then((r) => r.json()).then(setWorldData);
+  }, []);
 
-  const openAddModal = (lat, lng) => {
-    setNewPlaceModal({ isOpen: true, coords: [lat, lng], editIndex: null });
-    setFormName("");
-    setFormComment("");
-    setFormCategoryId(categories[0]?.id || "");
+  // Gestion modal
+  const openAddModal  = (lat, lng) => setModal({ isOpen: true, coords: [lat, lng], editIndex: null });
+  const openEditModal = (index)    => setModal({ isOpen: true, coords: visitedPlaces[index].coords, editIndex: index });
+  const closeModal    = ()         => setModal({ isOpen: false, coords: null, editIndex: null });
+
+  const handleSave = (placeData, editIndex) => {
+    const fullPlace = { ...placeData, coords: modal.coords };
+    editIndex !== null ? updatePlace(editIndex, fullPlace) : addPlace(fullPlace);
+    closeModal();
   };
 
-  const style = (feature) => {
-    const isVisited = activeDepartments.includes(feature.properties.code);
-    return {
-      fillColor: isVisited ? "#0400ff" : "#ffffff",
-      fillOpacity: isVisited ? 0.2 : 0,
-      color: "#191919",
-      opacity: isVisited ? 1 : 0.4,
-      weight: 1
-    };
-  };
+  // ---------------------------------------------------------------------------
+  // Styles et interactions — Départements
+  // ---------------------------------------------------------------------------
 
-  const worldStyle = (feature) => {
-    const name = feature.properties.name;
+  const departmentStyle = (feature) => getDepartmentStyle(feature, activeDepartments);
 
-    if (name === "France") {
-      return {
-        fillOpacity: 0,
-        opacity: 0
-      };
-    }
-
-    if (isNearbyCountry(feature)) {
-      return {
-        fillColor: "#000000",
-        fillOpacity: 0.25,
-        color: "#000000",
-        weight: 1,
-        opacity: 0.4
-      };
-    }
-
-    return {
-      fillOpacity: 0,
-      opacity: 0
-    };
-  };
-
-
-
-  const onEachFeature = (feature, layer) => {
+  const onEachDepartment = (feature, layer) => {
     layer.on({
-      click: (e) => {
-        openAddModal(e.latlng.lat, e.latlng.lng);
-      },
-      mouseover: (e) => {
-        e.target.setStyle({ weight: 3, color: "#2e1e69" });
-      },
-      mouseout: (e) => {
+      click:     (e) => openAddModal(e.latlng.lat, e.latlng.lng),
+      mouseover: (e) => e.target.setStyle({ weight: 3, color: "#2e1e69" }),
+      mouseout:  (e) => {
         const isVisited = activeDepartments.includes(feature.properties.code);
         e.target.setStyle({
           weight: 1,
           color: "#191919",
-          opacity: isVisited ? 1 : 0.4, 
-          fillOpacity: isVisited ? 0.2 : 0 
+          opacity:     isVisited ? 1   : 0.4,
+          fillOpacity: isVisited ? 0.2 : 0,
         });
-      }
+      },
     });
   };
 
+  // ---------------------------------------------------------------------------
+  // Styles et interactions — Régions
+  // ---------------------------------------------------------------------------
 
-  const handleEdit = (index) => {
-    const placeToEdit = visitedPlaces[index];
-    setFormName(placeToEdit.name);
-    setFormComment(placeToEdit.comment);
-    const matchingCategory = categories.find(c => c.name === placeToEdit.category?.name);
-    setFormCategoryId(matchingCategory ? matchingCategory.id : "");
-    setNewPlaceModal({
-      isOpen: true,
-      coords: placeToEdit.coords,
-      editIndex: index
+  const regionStyle = (feature) => getRegionStyle(feature, activeRegions);
+
+  const onEachRegion = (feature, layer) => {
+    layer.on({
+      click:     (e) => openAddModal(e.latlng.lat, e.latlng.lng),
+      mouseover: (e) => e.target.setStyle({ weight: 3, color: "#2e1e69" }),
+      mouseout:  (e) => {
+        const isVisited = activeRegions.includes(feature.properties.code);
+        e.target.setStyle({
+          weight: 2,
+          color: "#191919",
+          opacity:     isVisited ? 1   : 0.6,
+          fillOpacity: isVisited ? 0.2 : 0,
+        });
+      },
     });
   };
 
-  const saveNewPlace = () => {
-    if (!formName) return alert("Le nom est obligatoire");
-    const selectedCat = categories.find(c => c.id == formCategoryId);
-    if (!selectedCat) return alert("Sélectionnez une catégorie");
-
-    const placeData = {
-      name: formName,
-      comment: formComment,
-      coords: newPlaceModal.coords,
-      category: { name: selectedCat.name, color: selectedCat.color }
-    };
-
-    if (newPlaceModal.editIndex !== null) {
-      const updatedPlaces = [...visitedPlaces];
-      updatedPlaces[newPlaceModal.editIndex] = placeData;
-      setVisitedPlaces(updatedPlaces);
-    } else {
-      setVisitedPlaces(prev => [...prev, placeData]);
-    }
-
-    setNewPlaceModal({ isOpen: false, coords: null, editIndex: null });
-    setFormName("");
-    setFormComment("");
-    setFormCategoryId("");
-  };
-
-  const removePlace = (indexToRemove) => {
-    if (window.confirm("Supprimer ce lieu ?")) {
-      setVisitedPlaces(prev => prev.filter((_, index) => index !== indexToRemove));
-    }
-  };
-
-  const addCategory = (name, color) => {
-    if (!name) return;
-    const newCat = { id: Date.now(), name, color };
-    setCategories([...categories, newCat]);
-  };
-
-  const deleteCategory = (id) => {
-    if (window.confirm("Supprimer ce type de voyage ?")) {
-      setCategories((prev) => prev.filter((cat) => cat.id !== id));
-    }
-  };
-
-  function MapClickHandler({ onMapClick }) {
-    useMapEvents({
-      click(e) {
-        onMapClick(e.latlng.lat, e.latlng.lng);
-      }
-    });
-    return null;
-  }
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
 
   return (
     <>
-      <div style={{
-        position: "absolute", top: "12px", right: "12px", zIndex: 1000,
-        background: "white", padding: "10px 14px", borderRadius: "8px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.15)", textAlign: "right", fontFamily: "Arial"
-      }}>
-        <div style={{ fontSize: "30px", fontWeight: "bold", color: "#555" }}>Départements</div>
-        <div style={{ fontSize: "54px", fontWeight: "bold", marginBottom: "8px" }}>
-          {visitedCount} / {totalDepartments}
-        </div>
-        <button
-          onClick={() => setShowCategoryManager(!showCategoryManager)}
-          style={{ background: "#2e1e69", color: "white", border: "none", padding: "6px 10px", borderRadius: "4px", cursor: "pointer", fontSize: "30px" }}
-        >
-          🎨 Gérer types de voyages
-        </button>
-      </div>
+      <StatsPanel
+        visitedDeptCount={activeDepartments.length}
+        totalDepartments={departementsData?.features.length ?? 0}
+        visitedRegionCount={activeRegions.length}
+        totalRegions={REGIONS_META.length}
+        viewMode={viewMode}
+        onToggleViewMode={() => setViewMode((v) => v === "departement" ? "region" : "departement")}
+        onToggleCategories={() => setShowCategoryManager((prev) => !prev)}
+      />
 
       {showCategoryManager && (
-        <div style={{
-          position: "absolute", top: "110px", right: "12px", zIndex: 1000,
-          background: "white", padding: "15px", borderRadius: "8px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.2)", width: "250px", fontFamily: "Arial"
-        }}>
-          <h4 style={{ margin: "0 0 10px 0" }}>Types de voyages</h4>
-          <ul style={{ listStyle: "none", padding: 0, margin: "0 0 15px 0", maxHeight: "150px", overflowY: "auto" }}>
-            {categories.map(cat => (
-              <li key={cat.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <span style={{ width: "12px", height: "12px", borderRadius: "50%", background: cat.color, marginRight: "8px" }}></span>
-                  <span>{cat.name}</span>
-                </div>
-                <button
-                  onClick={() => deleteCategory(cat.id)}
-                  style={{ background: "transparent", color: "#999", border: "none", cursor: "pointer", fontWeight: "bold", fontSize: "14px", padding: "0 5px" }}
-                >
-                  &times;
-                </button>
-              </li>
-            ))}
-            {categories.length === 0 && <li style={{ fontSize: "12px", color: "#999", fontStyle: "italic" }}>Aucune catégorie.</li>}
-          </ul>
-          <div style={{ borderTop: "1px solid #eee", paddingTop: "10px" }}>
-            <div style={{ fontSize: "12px", marginBottom: "5px" }}>Nouveau type :</div>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              addCategory(e.target.catName.value, e.target.catColor.value);
-              e.target.reset();
-            }}>
-              <input name="catName" placeholder="Ex: Roadtrip..." style={{ width: "60%", marginRight: "5px", padding: "4px" }} required />
-              <input name="catColor" type="color" defaultValue="#ff0000" style={{ width: "20%", height: "26px", border: "none", verticalAlign: "bottom", padding: 0, cursor: "pointer" }} />
-              <button type="submit" style={{ width: "100%", marginTop: "8px", background: "#27ae60", color: "white", border: "none", padding: "5px", cursor: "pointer", borderRadius: "3px" }}>Ajouter</button>
-            </form>
-          </div>
-        </div>
+        <CategoryManager
+          categories={categories}
+          onAdd={addCategory}
+          onDelete={deleteCategory}
+        />
       )}
 
-      {newPlaceModal.isOpen && (
-        <div style={{
-          position: "absolute", top: "0", left: "0", width: "100%", height: "100%",
-          zIndex: 2000, background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center"
-        }}>
-          <div style={{ background: "white", padding: "20px", borderRadius: "8px", width: "320px", fontFamily: "Arial" }}>
-            <h3 style={{ marginTop: 0 }}>
-              {newPlaceModal.editIndex !== null ? "Modifier le lieu ✏️" : "Nouveau souvenir 📍"}
-            </h3>
-
-            <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>Nom du lieu</label>
-            <input
-              type="text"
-              value={formName}
-              onChange={(e) => setFormName(e.target.value)}
-              style={{ width: "100%", padding: "8px", marginBottom: "12px", boxSizing: "border-box" }}
-              autoFocus
-            />
-
-            <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>Commentaire</label>
-            <textarea
-              value={formComment}
-              onChange={(e) => setFormComment(e.target.value)}
-              placeholder="Avec qui ? Quel souvenir ?"
-              style={{ width: "100%", padding: "8px", marginBottom: "12px", height: "60px", boxSizing: "border-box" }}
-            />
-
-            <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>Type de voyage</label>
-            <select
-              value={formCategoryId}
-              onChange={(e) => setFormCategoryId(e.target.value)}
-              style={{ width: "100%", padding: "8px", marginBottom: "20px" }}
-            >
-              <option value="">-- Choisir une catégorie --</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
-
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <button onClick={() => setNewPlaceModal({ isOpen: false, coords: null, editIndex: null })} style={{ background: "#ccc", border: "none", padding: "8px 15px", borderRadius: "4px", cursor: "pointer" }}>Annuler</button>
-              <button onClick={saveNewPlace} style={{ background: "#2e1e69", color: "white", border: "none", padding: "8px 15px", borderRadius: "4px", cursor: "pointer" }}>
-                {newPlaceModal.editIndex !== null ? "Mettre à jour" : "Enregistrer"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PlaceModal
+        isOpen={modal.isOpen}
+        editIndex={modal.editIndex}
+        initialData={modal.editIndex !== null ? visitedPlaces[modal.editIndex] : null}
+        categories={categories}
+        onSave={handleSave}
+        onClose={closeModal}
+      />
 
       <MapContainer
         center={[46.6, 2.5]}
         zoom={6}
         minZoom={4}
-        maxBounds={[
-          [30, -15],   // Sud-Ouest (Atlantique / Maroc)
-          [65, 25]     // Nord-Est (Scandinavie / Europe Est)
-        ]}
+        maxBounds={[[30, -15], [65, 25]]}
         maxBoundsViscosity={1.0}
         style={{ height: "100vh", width: "100%" }}
       >
-        <TileLayer attribution="&copy; OpenStreetMap" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        {worldData && (
-          <GeoJSON
-            data={worldData}
-            style={worldStyle}
-            interactive={false} 
-          />
-        )}
+        <TileLayer
+          attribution="&copy; OpenStreetMap"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
+        {worldData && (
+          <GeoJSON data={worldData} style={getWorldStyle} interactive={false} />
+        )}
 
         <MapClickHandler onMapClick={openAddModal} />
 
-        {departementsData && (
+        {/* Couche départements */}
+        {viewMode === "departement" && departementsData && (
           <GeoJSON
+            key={"dept-" + activeDepartments.join(",")}
             data={departementsData}
-            style={style}
-            onEachFeature={onEachFeature}
-            key={activeDepartments.join(',')}
+            style={departmentStyle}
+            onEachFeature={onEachDepartment}
           />
         )}
 
+        {/* Couche régions */}
+        {viewMode === "region" && regionsData && (
+          <GeoJSON
+            key={"region-" + activeRegions.join(",")}
+            data={regionsData}
+            style={regionStyle}
+            onEachFeature={onEachRegion}
+          />
+        )}
+
+        {/* Marqueurs — toujours visibles quel que soit le mode */}
         {visitedPlaces.map((place, idx) => (
           <Marker
             key={idx}
@@ -413,13 +196,17 @@ function MapView() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: "6px"
+                gap: "6px",
               }}>
-
                 <strong style={{ fontSize: "14px" }}>{place.name}</strong>
                 <div style={{
-                  display: "inline-block", padding: "2px 8px", borderRadius: "12px",
-                  background: place.category?.color || "#eee", color: "#f8ebeb", fontSize: "11px", fontWeight: "bold"
+                  display: "inline-block",
+                  padding: "2px 8px",
+                  borderRadius: "12px",
+                  background: place.category?.color || "#eee",
+                  color: "#f8ebeb",
+                  fontSize: "11px",
+                  fontWeight: "bold",
                 }}>
                   {place.category?.name || "Inconnu"}
                 </div>
@@ -427,8 +214,18 @@ function MapView() {
                   "{place.comment}"
                 </div>
                 <div style={{ display: "flex", gap: "5px", justifyContent: "center" }}>
-                  <button onClick={() => handleEdit(idx)} style={{ background: "#3498db", color: "white", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "11px" }}>Modifier</button>
-                  <button onClick={() => removePlace(idx)} style={{ background: "#e74c3c", color: "white", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "11px" }}>Supprimer</button>
+                  <button
+                    onClick={() => openEditModal(idx)}
+                    style={{ background: "#3498db", color: "white", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "11px" }}
+                  >
+                    Modifier
+                  </button>
+                  <button
+                    onClick={() => removePlace(idx)}
+                    style={{ background: "#e74c3c", color: "white", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "11px" }}
+                  >
+                    Supprimer
+                  </button>
                 </div>
               </div>
             </Popup>
