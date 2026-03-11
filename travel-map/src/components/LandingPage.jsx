@@ -98,7 +98,7 @@ function LandingPage({ onStart }) {
             gap: 15px;
             justify-content: center;
             margin-top: 30px;
-            flex-wrap: wrap;
+           
           }
           .gallery img {
             width: 300px;
