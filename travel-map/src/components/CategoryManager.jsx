@@ -1,13 +1,14 @@
 /**
  * Panneau flottant pour gérer les catégories de voyage :
  * affichage, suppression, et ajout d'une nouvelle catégorie.
+ * Positionné à gauche du StatsPanel pour ne pas le recouvrir.
  */
-function CategoryManager({ categories, onAdd, onDelete }) {
+function CategoryManager({ categories, onAdd, onDelete, onClose }) {
   return (
     <div style={{
       position: "absolute",
-      top: "185px",
-      right: "12px",
+      top: "12px",
+      right: "270px", // à gauche du StatsPanel (~250px de large + 12px de marge)
       zIndex: 1000,
       background: "white",
       padding: "15px",
@@ -16,7 +17,15 @@ function CategoryManager({ categories, onAdd, onDelete }) {
       width: "250px",
       fontFamily: "Arial",
     }}>
-      <h4 style={{ margin: "0 0 10px 0" }}>Types de voyages</h4>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+        <h4 style={{ margin: 0 }}>Types de voyages</h4>
+        <button
+          onClick={onClose}
+          style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "18px", color: "#999", lineHeight: 1 }}
+        >
+          &times;
+        </button>
+      </div>
 
       {/* Liste des catégories existantes */}
       <ul style={{

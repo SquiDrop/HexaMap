@@ -130,6 +130,7 @@ function MapView() {
           categories={categories}
           onAdd={addCategory}
           onDelete={deleteCategory}
+          onClose={() => setShowCategoryManager(false)}
         />
       )}
 
