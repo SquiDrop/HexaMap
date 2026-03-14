@@ -1,10 +1,3 @@
-/**
- * Panneau en haut à droite :
- * - compteur départements visités
- * - compteur régions complétées
- * - bouton toggle Département / Région
- * - bouton gestion des catégories
- */
 function StatsPanel({
   visitedDeptCount,
   totalDepartments,
@@ -13,8 +6,23 @@ function StatsPanel({
   viewMode,
   onToggleViewMode,
   onToggleCategories,
+  onToggleObjectives,
+  showObjectives,
 }) {
   const isRegionMode = viewMode === "region";
+
+  const btnBase = {
+    display: "block",
+    width: "100%",
+    padding: "6px 10px",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: "bold",
+    marginBottom: "6px",
+    border: "none",
+    textAlign: "left",
+  };
 
   return (
     <div style={{
@@ -30,57 +38,43 @@ function StatsPanel({
       fontFamily: "Arial",
       minWidth: "220px",
     }}>
-      {/* Compteur départements */}
-      <div style={{ fontSize: "18px", fontWeight: "bold", color: "#555" }}>
-        Départements
-      </div>
-      <div style={{ fontSize: "42px", fontWeight: "bold", lineHeight: 1.1 }}>
+      <div style={{ fontSize: "16px", fontWeight: "bold", color: "#555" }}>Départements</div>
+      <div style={{ fontSize: "40px", fontWeight: "bold", lineHeight: 1.1 }}>
         {visitedDeptCount} / {totalDepartments}
       </div>
 
-      {/* Compteur régions */}
-      <div style={{ fontSize: "18px", fontWeight: "bold", color: "#555", marginTop: "8px" }}>
-        Régions
-      </div>
-      <div style={{ fontSize: "42px", fontWeight: "bold", lineHeight: 1.1, marginBottom: "12px" }}>
+      <div style={{ fontSize: "16px", fontWeight: "bold", color: "#555", marginTop: "6px" }}>Régions</div>
+      <div style={{ fontSize: "40px", fontWeight: "bold", lineHeight: 1.1, marginBottom: "12px" }}>
         {visitedRegionCount} / {totalRegions}
       </div>
 
-      {/* Bouton toggle vue */}
       <button
         onClick={onToggleViewMode}
         style={{
-          display: "block",
-          width: "100%",
-          marginBottom: "8px",
+          ...btnBase,
           background: isRegionMode ? "#2e1e69" : "#f0f0f0",
           color: isRegionMode ? "white" : "#333",
           border: "2px solid #2e1e69",
-          padding: "6px 10px",
-          borderRadius: "4px",
-          cursor: "pointer",
-          fontSize: "14px",
-          fontWeight: "bold",
-          transition: "all 0.2s",
         }}
       >
         {isRegionMode ? "🗺️ Vue Régions" : "🗺️ Vue Départements"}
       </button>
 
-      {/* Bouton catégories */}
+      <button
+        onClick={onToggleObjectives}
+        style={{
+          ...btnBase,
+          background: showObjectives ? "#2e1e69" : "#f0f0f0",
+          color: showObjectives ? "white" : "#333",
+          border: "2px solid #2e1e69",
+        }}
+      >
+        🎯 Défis
+      </button>
+
       <button
         onClick={onToggleCategories}
-        style={{
-          display: "block",
-          width: "100%",
-          background: "#2e1e69",
-          color: "white",
-          border: "none",
-          padding: "6px 10px",
-          borderRadius: "4px",
-          cursor: "pointer",
-          fontSize: "14px",
-        }}
+        style={{ ...btnBase, background: "#2e1e69", color: "white", marginBottom: 0 }}
       >
         🎨 Gérer types de voyages
       </button>
