@@ -3,7 +3,7 @@ import { getDepartmentCodeFromCoords } from "../utils/mapUtils";
 
 const DEFAULT_CATEGORIES = [
   { id: 1, name: "Escapade romantique", color: "#E63946" },
-  { id: 2, name: "Week-end entre potes", color: "#db6591" },
+  { id: 2, name: "Sortie entre potes", color: "#db6591" },
   { id: 3, name: "Culture & Patrimoine", color: "#8E44AD" },
   { id: 4, name: "Voyage Solo", color: "#3949AB" },
   { id: 5, name: "Vacances à la mer", color: "#1E88E5" },

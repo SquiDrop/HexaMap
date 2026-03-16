@@ -1,43 +1,106 @@
+import { useState, useEffect, useRef } from "react";
 
-import { useState, useEffect } from "react";
+// ---------------------------------------------------------------------------
+// Compression image — pas de lib externe, canvas natif
+// ---------------------------------------------------------------------------
 
 /**
- * Modal pour ajouter un nouveau lieu ou modifier un lieu existant.
- * 
- * Props :
- * - isOpen        : booléen, affiche ou masque la modal
- * - editIndex     : null (ajout) ou index (édition)
- * - initialData   : données du lieu à éditer (null si ajout)
- * - categories    : liste des catégories disponibles
- * - onSave        : callback(placeData, editIndex)
- * - onClose       : callback pour fermer sans sauvegarder
+ * Compresse une image File en base64.
+ * Redimensionne à max 800px de large et encode en JPEG qualité 0.7.
+ * Résultat typique : 30-80KB par photo.
  */
+const compressImage = (file) => {
+  return new Promise((resolve, reject) => {
+    const MAX_WIDTH = 800;
+    const QUALITY   = 0.7;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ratio  = Math.min(1, MAX_WIDTH / img.width);
+        canvas.width  = Math.round(img.width  * ratio);
+        canvas.height = Math.round(img.height * ratio);
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        resolve(canvas.toDataURL("image/jpeg", QUALITY));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
+// ---------------------------------------------------------------------------
+// Composant modal
+// ---------------------------------------------------------------------------
+
 function PlaceModal({ isOpen, editIndex, initialData, categories, onSave, onClose }) {
-  const [formName, setFormName] = useState("");
-  const [formComment, setFormComment] = useState("");
+  const [formName, setFormName]         = useState("");
+  const [formComment, setFormComment]   = useState("");
   const [formCategoryId, setFormCategoryId] = useState("");
+  const [formPhoto, setFormPhoto]       = useState(null);  // base64 ou null
+  const [photoPreview, setPhotoPreview] = useState(null);  // URL de préview
+  const [isCompressing, setIsCompressing] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Pré-remplissage si édition
   useEffect(() => {
     if (initialData) {
       setFormName(initialData.name || "");
       setFormComment(initialData.comment || "");
-      const matchingCategory = categories.find(
-        (c) => c.name === initialData.category?.name
-      );
+      const matchingCategory = categories.find(c => c.name === initialData.category?.name);
       setFormCategoryId(matchingCategory ? matchingCategory.id : "");
+      setFormPhoto(initialData.photo || null);
+      setPhotoPreview(initialData.photo || null);
     } else {
       setFormName("");
       setFormComment("");
       setFormCategoryId(categories[0]?.id || "");
+      setFormPhoto(null);
+      setPhotoPreview(null);
     }
   }, [initialData, categories, isOpen]);
 
   if (!isOpen) return null;
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Vérification type
+    if (!file.type.startsWith("image/")) {
+      alert("Veuillez sélectionner une image.");
+      return;
+    }
+
+    setIsCompressing(true);
+    try {
+      const compressed = await compressImage(file);
+      setFormPhoto(compressed);
+      setPhotoPreview(compressed);
+    } catch (err) {
+      alert("Erreur lors du chargement de l'image.");
+      console.error(err);
+    } finally {
+      setIsCompressing(false);
+    }
+  };
+
+  const removePhoto = () => {
+    setFormPhoto(null);
+    setPhotoPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleSave = () => {
     if (!formName) return alert("Le nom est obligatoire");
-    const selectedCat = categories.find((c) => c.id == formCategoryId);
+    const selectedCat = categories.find(c => c.id == formCategoryId);
     if (!selectedCat) return alert("Sélectionnez une catégorie");
 
     onSave(
@@ -45,6 +108,7 @@ function PlaceModal({ isOpen, editIndex, initialData, categories, onSave, onClos
         name: formName,
         comment: formComment,
         category: { name: selectedCat.name, color: selectedCat.color },
+        photo: formPhoto || null,
       },
       editIndex
     );
@@ -52,74 +116,121 @@ function PlaceModal({ isOpen, editIndex, initialData, categories, onSave, onClos
 
   return (
     <div style={{
-      position: "absolute",
-      top: 0, left: 0,
-      width: "100%", height: "100%",
-      zIndex: 2000,
+      position: "absolute", top: 0, left: 0,
+      width: "100%", height: "100%", zIndex: 2000,
       background: "rgba(0,0,0,0.5)",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
+      display: "flex", justifyContent: "center", alignItems: "center",
     }}>
       <div style={{
-        background: "white",
-        padding: "20px",
-        borderRadius: "8px",
-        width: "320px",
-        fontFamily: "Arial",
+        background: "white", padding: "20px", borderRadius: "8px",
+        width: "340px", fontFamily: "Arial", maxHeight: "90vh", overflowY: "auto",
       }}>
         <h3 style={{ marginTop: 0 }}>
           {editIndex !== null ? "Modifier le lieu ✏️" : "Nouveau souvenir 📍"}
         </h3>
 
-        <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>
-          Nom du lieu
-        </label>
+        {/* Nom */}
+        <label style={labelStyle}>Nom du lieu</label>
         <input
           type="text"
           value={formName}
-          onChange={(e) => setFormName(e.target.value)}
-          style={{ width: "100%", padding: "8px", marginBottom: "12px", boxSizing: "border-box" }}
+          onChange={e => setFormName(e.target.value)}
+          style={inputStyle}
           autoFocus
         />
 
-        <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>
-          Commentaire
-        </label>
+        {/* Commentaire */}
+        <label style={labelStyle}>Commentaire</label>
         <textarea
           value={formComment}
-          onChange={(e) => setFormComment(e.target.value)}
+          onChange={e => setFormComment(e.target.value)}
           placeholder="Avec qui ? Quel souvenir ?"
-          style={{ width: "100%", padding: "8px", marginBottom: "12px", height: "60px", boxSizing: "border-box" }}
+          style={{ ...inputStyle, height: "60px", resize: "vertical" }}
         />
 
-        <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>
-          Type de voyage
-        </label>
+        {/* Catégorie */}
+        <label style={labelStyle}>Type de voyage</label>
         <select
           value={formCategoryId}
-          onChange={(e) => setFormCategoryId(e.target.value)}
-          style={{ width: "100%", padding: "8px", marginBottom: "20px" }}
+          onChange={e => setFormCategoryId(e.target.value)}
+          style={{ ...inputStyle, marginBottom: "16px" }}
         >
           <option value="">-- Choisir une catégorie --</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
+          {categories.map(cat => (
+            <option key={cat.id} value={cat.id}>{cat.name}</option>
           ))}
         </select>
 
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <button
-            onClick={onClose}
-            style={{ background: "#ccc", border: "none", padding: "8px 15px", borderRadius: "4px", cursor: "pointer" }}
+        {/* Photo */}
+        <label style={labelStyle}>Photo du souvenir</label>
+
+        {/* Preview ou zone d'upload */}
+        {photoPreview ? (
+          <div style={{ position: "relative", marginBottom: "12px" }}>
+            <img
+              src={photoPreview}
+              alt="Aperçu"
+              style={{
+                width: "100%", height: "160px",
+                objectFit: "cover", borderRadius: "6px",
+                display: "block",
+              }}
+            />
+            <button
+              onClick={removePhoto}
+              style={{
+                position: "absolute", top: "6px", right: "6px",
+                background: "rgba(0,0,0,0.55)", color: "white",
+                border: "none", borderRadius: "50%",
+                width: "26px", height: "26px",
+                cursor: "pointer", fontSize: "14px", lineHeight: 1,
+              }}
+            >
+              ✕
+            </button>
+            {/* Bouton changer la photo */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                position: "absolute", bottom: "6px", right: "6px",
+                background: "rgba(0,0,0,0.55)", color: "white",
+                border: "none", borderRadius: "4px",
+                padding: "3px 8px", cursor: "pointer", fontSize: "11px",
+              }}
+            >
+              Changer
+            </button>
+          </div>
+        ) : (
+          <div
+            onClick={() => !isCompressing && fileInputRef.current?.click()}
+            style={{
+              border: "2px dashed #ddd", borderRadius: "6px",
+              padding: "20px", textAlign: "center",
+              cursor: isCompressing ? "wait" : "pointer",
+              marginBottom: "12px", color: "#aaa", fontSize: "13px",
+              transition: "border-color 0.2s",
+            }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = "#2e1e69"}
+            onMouseLeave={e => e.currentTarget.style.borderColor = "#ddd"}
           >
-            Annuler
-          </button>
-          <button
-            onClick={handleSave}
-            style={{ background: "#2e1e69", color: "white", border: "none", padding: "8px 15px", borderRadius: "4px", cursor: "pointer" }}
-          >
+            {isCompressing ? "⏳ Compression en cours..." : "📷 Ajouter une photo"}
+          </div>
+        )}
+
+        {/* Input file caché */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          style={{ display: "none" }}
+        />
+
+        {/* Boutons */}
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "8px" }}>
+          <button onClick={onClose} style={btnCancel}>Annuler</button>
+          <button onClick={handleSave} style={btnSave}>
             {editIndex !== null ? "Mettre à jour" : "Enregistrer"}
           </button>
         </div>
@@ -127,5 +238,11 @@ function PlaceModal({ isOpen, editIndex, initialData, categories, onSave, onClos
     </div>
   );
 }
+
+// Styles partagés
+const labelStyle = { display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" };
+const inputStyle = { width: "100%", padding: "8px", marginBottom: "12px", boxSizing: "border-box", border: "1px solid #ddd", borderRadius: "4px" };
+const btnCancel  = { background: "#ccc", border: "none", padding: "8px 15px", borderRadius: "4px", cursor: "pointer" };
+const btnSave    = { background: "#2e1e69", color: "white", border: "none", padding: "8px 15px", borderRadius: "4px", cursor: "pointer" };
 
 export default PlaceModal;

@@ -19,11 +19,11 @@ import ObjectivesPanel from "./ObjectivesPanel";
 
 function MapView() {
   const [departementsData, setDepartementsData] = useState(null);
-  const [regionsData, setRegionsData]           = useState(null);
-  const [worldData, setWorldData]               = useState(null);
+  const [regionsData, setRegionsData] = useState(null);
+  const [worldData, setWorldData] = useState(null);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
-  const [showObjectives, setShowObjectives]     = useState(false);
-  const [viewMode, setViewMode]                 = useState("departement");
+  const [showObjectives, setShowObjectives] = useState(false);
+  const [viewMode, setViewMode] = useState("departement");
   const [modal, setModal] = useState({ isOpen: false, coords: null, editIndex: null });
 
   const {
@@ -54,9 +54,9 @@ function MapView() {
   }, []);
 
   // Gestion modal
-  const openAddModal  = (lat, lng) => setModal({ isOpen: true, coords: [lat, lng], editIndex: null });
-  const openEditModal = (index)    => setModal({ isOpen: true, coords: visitedPlaces[index].coords, editIndex: index });
-  const closeModal    = ()         => setModal({ isOpen: false, coords: null, editIndex: null });
+  const openAddModal = (lat, lng) => setModal({ isOpen: true, coords: [lat, lng], editIndex: null });
+  const openEditModal = (index) => setModal({ isOpen: true, coords: visitedPlaces[index].coords, editIndex: index });
+  const closeModal = () => setModal({ isOpen: false, coords: null, editIndex: null });
 
   const handleSave = (placeData, editIndex) => {
     const fullPlace = { ...placeData, coords: modal.coords };
@@ -68,14 +68,45 @@ function MapView() {
   const departmentStyle = (feature) => getDepartmentStyle(feature, activeDepartments);
 
   const onEachDepartment = (feature, layer) => {
+    const { code, nom } = feature.properties;
+    let tooltipTimer = null;
+
+    // Prépare le tooltip Leaflet (caché par défaut)
+    layer.bindTooltip(
+      `<div style="font-family:Arial;font-size:13px;text-align:center;padding:2px 4px">
+        <strong>${nom}</strong><br/>
+        <span style="color:#888;font-size:11px">Dép. ${code}</span>
+      </div>`,
+      { sticky: false, opacity: 0.95, className: "hexamap-tooltip" }
+    );
+
     layer.on({
-      click:     (e) => openAddModal(e.latlng.lat, e.latlng.lng),
-      mouseover: (e) => e.target.setStyle({ weight: 3, color: "#2e1e69" }),
-      mouseout:  (e) => {
-        const isVisited = activeDepartments.includes(feature.properties.code);
+      click: (e) => openAddModal(e.latlng.lat, e.latlng.lng),
+
+      mouseover: (e) => {
+        e.target.setStyle({ weight: 3, color: "#2e1e69" });
+        // Démarre le timer : affiche le tooltip après 3s
+        tooltipTimer = setTimeout(() => {
+          layer.openTooltip(e.latlng);
+        }, 3000);
+      },
+
+      mousemove: () => {
+        // Réinitialise le timer si la souris bouge
+        clearTimeout(tooltipTimer);
+        layer.closeTooltip();
+        tooltipTimer = setTimeout(() => {
+          layer.openTooltip();
+        }, 3000);
+      },
+
+      mouseout: (e) => {
+        clearTimeout(tooltipTimer);
+        layer.closeTooltip();
+        const isVisited = activeDepartments.includes(code);
         e.target.setStyle({
           weight: 1, color: "#191919",
-          opacity:     isVisited ? 1   : 0.4,
+          opacity: isVisited ? 1 : 0.4,
           fillOpacity: isVisited ? 0.2 : 0,
         });
       },
@@ -86,14 +117,41 @@ function MapView() {
   const regionStyle = (feature) => getRegionStyle(feature, activeRegions);
 
   const onEachRegion = (feature, layer) => {
+    const { code, nom } = feature.properties;
+    let tooltipTimer = null;
+
+    layer.bindTooltip(
+      `<div style="font-family:Arial;font-size:13px;text-align:center;padding:2px 4px">
+        <strong>${nom}</strong>
+      </div>`,
+      { sticky: false, opacity: 0.95, className: "hexamap-tooltip" }
+    );
+
     layer.on({
-      click:     (e) => openAddModal(e.latlng.lat, e.latlng.lng),
-      mouseover: (e) => e.target.setStyle({ weight: 3, color: "#2e1e69" }),
-      mouseout:  (e) => {
-        const isVisited = activeRegions.includes(feature.properties.code);
+      click: (e) => openAddModal(e.latlng.lat, e.latlng.lng),
+
+      mouseover: (e) => {
+        e.target.setStyle({ weight: 3, color: "#2e1e69" });
+        tooltipTimer = setTimeout(() => {
+          layer.openTooltip(e.latlng);
+        }, 3000);
+      },
+
+      mousemove: () => {
+        clearTimeout(tooltipTimer);
+        layer.closeTooltip();
+        tooltipTimer = setTimeout(() => {
+          layer.openTooltip();
+        }, 3000);
+      },
+
+      mouseout: (e) => {
+        clearTimeout(tooltipTimer);
+        layer.closeTooltip();
+        const isVisited = activeRegions.includes(code);
         e.target.setStyle({
           weight: 2, color: "#191919",
-          opacity:     isVisited ? 1   : 0.6,
+          opacity: isVisited ? 1 : 0.6,
           fillOpacity: isVisited ? 0.2 : 0,
         });
       },
@@ -142,11 +200,12 @@ function MapView() {
       />
 
       <MapContainer
+        key="free"
         center={[46.6, 2.5]}
         zoom={6}
-        minZoom={4}
-        maxBounds={[[30, -15], [65, 25]]}
-        maxBoundsViscosity={1.0}
+        //minZoom={4}
+        //maxBounds={[[30, -15], [65, 25]]}
+        //maxBoundsViscosity={1.0}
         style={{ height: "100vh", width: "100%" }}
       >
         <TileLayer
@@ -184,25 +243,66 @@ function MapView() {
             position={place.coords}
             icon={createCustomIcon(place.category?.color || "#333")}
           >
-            <Popup>
+            <Popup minWidth={200} maxWidth={280}>
               <div style={{
-                fontFamily: "Arial", textAlign: "center", minWidth: "150px",
+                fontFamily: "Arial",
                 display: "flex", flexDirection: "column", alignItems: "center", gap: "6px",
+                textAlign: "center",
               }}>
+                {/* Photo si disponible */}
+                {place.photo && (
+                  <div style={{
+                    width: "100%",
+                    background: "#f5f5f5",
+                    borderRadius: "6px",
+                    overflow: "hidden",
+                    marginBottom: "2px",
+                  }}>
+                    <img
+                      src={place.photo}
+                      alt={place.name}
+                      style={{
+                        width: "100%",
+                        maxHeight: "220px",
+                        objectFit: "contain",
+                        display: "block",
+                      }}
+                    />
+                  </div>
+                )}
+
                 <strong style={{ fontSize: "14px" }}>{place.name}</strong>
+
+                {/* Badge catégorie */}
                 <div style={{
                   display: "inline-block", padding: "2px 8px", borderRadius: "12px",
-                  background: place.category?.color || "#eee", color: "#f8ebeb",
-                  fontSize: "11px", fontWeight: "bold",
+                  background: place.category?.color || "#eee",
+                  color: "#f8ebeb", fontSize: "11px", fontWeight: "bold",
                 }}>
                   {place.category?.name || "Inconnu"}
                 </div>
-                <div style={{ fontSize: "13px", fontStyle: "italic", color: "#555", marginBottom: "10px" }}>
-                  "{place.comment}"
-                </div>
-                <div style={{ display: "flex", gap: "5px" }}>
-                  <button onClick={() => openEditModal(idx)} style={{ background: "#3498db", color: "white", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "11px" }}>Modifier</button>
-                  <button onClick={() => removePlace(idx)}   style={{ background: "#e74c3c", color: "white", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "11px" }}>Supprimer</button>
+
+                {/* Commentaire */}
+                {place.comment && (
+                  <div style={{ fontSize: "13px", fontStyle: "italic", color: "#555" }}>
+                    "{place.comment}"
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div style={{ display: "flex", gap: "5px", marginTop: "4px" }}>
+                  <button
+                    onClick={() => openEditModal(idx)}
+                    style={{ background: "#3498db", color: "white", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "11px" }}
+                  >
+                    Modifier
+                  </button>
+                  <button
+                    onClick={() => removePlace(idx)}
+                    style={{ background: "#e74c3c", color: "white", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "11px" }}
+                  >
+                    Supprimer
+                  </button>
                 </div>
               </div>
             </Popup>

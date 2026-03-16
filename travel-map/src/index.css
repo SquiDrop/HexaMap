@@ -66,3 +66,18 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* À coller dans ton index.css ou App.css */
+
+.hexamap-tooltip {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 6px 10px;
+}
+
+/* Supprime la petite flèche par défaut de Leaflet */
+.hexamap-tooltip::before {
+  display: none;
+}
