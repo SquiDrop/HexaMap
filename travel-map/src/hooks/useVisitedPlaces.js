@@ -1,6 +1,8 @@
 import { useState, useMemo } from "react";
 import { getDepartmentCodeFromCoords } from "../utils/mapUtils";
 
+const CATEGORIES_VERSION = 5; // Incrémente à chaque mise à jour de DEFAULT_CATEGORIES
+
 const DEFAULT_CATEGORIES = [
   { id: 1, name: "Escapade romantique", color: "#E63946" },
   { id: 2, name: "Sortie entre potes", color: "#db6591" },
@@ -12,8 +14,9 @@ const DEFAULT_CATEGORIES = [
   { id: 8, name: "Gastronomie & Terroir", color: "#F4511E" },
   { id: 9, name: "Famille & Maison", color: "#6D4C41" },
   { id: 10, name: "Déplacement pro", color: "#546E7A" },
-  { id: 11, name: "Ski & Montagne", color: "#0097A7" },
-  { id: 12, name: "Coins à champignon", color: "#C08552" },
+  { id: 11, name: "Journées de ski", color: "#242323" },
+  { id: 12, name: "Montagne", color: "#0097A7" },
+  { id: 13, name: "Coins à champignon", color: "#C08552" },
 ];
 
 const DEFAULT_PLACES = [
@@ -28,7 +31,11 @@ const DEFAULT_PLACES = [
 export function useVisitedPlaces(departementsData) {
   const [categories, setCategories] = useState(() => {
     const saved = localStorage.getItem("tripCategories");
-    return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+    if (saved) {
+      const { version, data } = JSON.parse(saved);
+      if (version === CATEGORIES_VERSION) return data;
+    }
+    return DEFAULT_CATEGORIES;
   });
 
   const [visitedPlaces, setVisitedPlaces] = useState(() => {
@@ -42,7 +49,7 @@ export function useVisitedPlaces(departementsData) {
   }, [visitedPlaces]);
 
   useMemo(() => {
-    localStorage.setItem("tripCategories", JSON.stringify(categories));
+    localStorage.setItem("tripCategories", JSON.stringify({ version: CATEGORIES_VERSION, data: categories }));
   }, [categories]);
 
   // Calcul des départements actifs

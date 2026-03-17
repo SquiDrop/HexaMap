@@ -81,3 +81,8 @@ button:focus-visible {
 .hexamap-tooltip::before {
   display: none;
 }
+
+/* Supprime le outline de focus sur les couches SVG Leaflet */
+.leaflet-interactive:focus {
+  outline: none;
+}
