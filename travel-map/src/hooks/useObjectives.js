@@ -1,13 +1,21 @@
-// Départements côtiers (façades Atlantique, Manche, Méditerranée)
-const COASTAL_DEPTS = [
-  "14","17","22","29","33","34","35","40","44","50",
-  "56","59","62","64","66","76","83","85","06","13","2A","2B"
+// Côte Atlantique & Manche
+const ATLANTIC_DEPTS = [
+  "14","17","22","29","33","35","40","44","50","56","59","62","64","76","85"
 ];
 
-// Départements de montagne (Alpes, Pyrénées, Massif Central, Vosges, Jura)
-const MOUNTAIN_DEPTS = [
-  "01","04","05","06","07","09","12","15","19","23","25",
-  "38","39","42","43","48","63","65","66","69","73","74","88"
+// Côte Méditerranée
+const MEDITERRANEAN_DEPTS = [
+  "06","13","34","66","83","2A","2B"
+];
+
+// Alpes (départements alpins stricts)
+const ALPINE_DEPTS = [
+  "04","05","06","38","73","74"
+];
+
+// Pyrénées
+const PYRENEAN_DEPTS = [
+  "09","64","65","66"
 ];
 
 export const PRESET_CHALLENGES = [
@@ -21,14 +29,30 @@ export const PRESET_CHALLENGES = [
   { id: "region_5",  type: "region",      label: "Collectionneur",       description: "Compléter 5 régions",         target: 5,   unit: "régions" },
   { id: "region_13", type: "region",      label: "Maître de l'Hexagone", description: "Compléter les 13 régions",    target: 13,  unit: "régions" },
   // — Catégories —
-  { id: "cat_rando",  type: "categorie", label: "Randonneur",       description: "3 lieux Rando & Nature",         target: 3, unit: "lieux", categoryName: "Rando & Nature" },
-  { id: "cat_mer",    type: "categorie", label: "Marin d'eau douce",description: "3 lieux Vacances à la mer",      target: 3, unit: "lieux", categoryName: "Vacances à la mer" },
-  { id: "cat_gastro", type: "categorie", label: "Gourmet",          description: "3 lieux Gastronomie & Terroir",  target: 3, unit: "lieux", categoryName: "Gastronomie & Terroir" },
-  { id: "cat_ski",    type: "categorie", label: "Skieur",           description: "2 lieux Ski & Montagne",         target: 2, unit: "lieux", categoryName: "Ski & Montagne" },
+  { id: "cat_rando_3",       type: "categorie", label: "Randonneur",            description: "3 lieux Rando & Nature",              target: 3,  unit: "lieux", categoryName: "Rando & Nature" },
+  { id: "cat_rando_7",       type: "categorie", label: "Grand randonneur 🥾",      description: "7 lieux Rando & Nature",              target: 7,  unit: "lieux", categoryName: "Rando & Nature" },
+  { id: "cat_mer_3",         type: "categorie", label: "Marin d'eau douce",     description: "3 lieux Vacances à la mer",           target: 3,  unit: "lieux", categoryName: "Vacances à la mer" },
+  { id: "cat_mer_8",         type: "categorie", label: "Seigneur des mers 🔱",description: "8 lieux Vacances à la mer",          target: 8,  unit: "lieux", categoryName: "Vacances à la mer" },
+  { id: "cat_gastro_3",      type: "categorie", label: "Gourmet",               description: "3 lieux Gastronomie & Terroir",       target: 3,  unit: "lieux", categoryName: "Gastronomie & Terroir" },
+  { id: "cat_gastro_8",      type: "categorie", label: "Chef étoilé 👨‍🍳",           description: "8 lieux Gastronomie & Terroir",       target: 8,  unit: "lieux", categoryName: "Gastronomie & Terroir" },
+  { id: "cat_ski_2",         type: "categorie", label: "Skieur",                description: "2 lieux Ski & Montagne",              target: 2,  unit: "lieux", categoryName: "Ski & Montagne" },
+  { id: "cat_ski_5",         type: "categorie", label: "Roi de la glisse ⛷️",             description: "5 lieux Ski & Montagne",              target: 5,  unit: "lieux", categoryName: "Ski & Montagne" },
+  { id: "cat_culture_3",     type: "categorie", label: "Curieux culturel",      description: "3 lieux Culture & Patrimoine",        target: 3,  unit: "lieux", categoryName: "Culture & Patrimoine" },
+  { id: "cat_culture_8",     type: "categorie", label: "Historien passionné 🏺",   description: "8 lieux Culture & Patrimoine",        target: 8,  unit: "lieux", categoryName: "Culture & Patrimoine" },
+  { id: "cat_romantique_2",  type: "categorie", label: "Romantique",            description: "2 lieux Escapade romantique",         target: 2,  unit: "lieux", categoryName: "Escapade romantique" },
+  { id: "cat_romantique_5",  type: "categorie", label: "Grand romantique 😍",      description: "5 lieux Escapade romantique",         target: 5,  unit: "lieux", categoryName: "Escapade romantique" },
+  { id: "cat_roadtrip_3",    type: "categorie", label: "Roadtripper 🚗",           description: "3 lieux Découverte & Roadtrip",       target: 3,  unit: "lieux", categoryName: "Découverte & Roadtrip" },
+  { id: "cat_cepes_5",       type: "categorie", label: "Chasseur de champis 🍄",     description: "5 lieux Coins à cèpes",               target: 5,  unit: "lieux", categoryName: "Coins à cèpes" },
   // — Géographiques —
-  { id: "geo_coast_5",  type: "geo", label: "L'appel du large",  description: "Visiter 5 départements côtiers",    target: 5,  unit: "dpt côtiers",  deptList: COASTAL_DEPTS },
-  { id: "geo_coast_10", type: "geo", label: "Tour du littoral",  description: "Visiter 10 départements côtiers",   target: 10, unit: "dpt côtiers",  deptList: COASTAL_DEPTS },
-  { id: "geo_mountain", type: "geo", label: "Homme des sommets", description: "Visiter 5 départements de montagne",target: 5,  unit: "dpt montagne", deptList: MOUNTAIN_DEPTS },
+  { id: "geo_atlantic_5",    type: "geo", label: "L'appel du large",        description: "Visiter 5 dpts Atlantique & Manche",   target: 5,  unit: "dpt atlantiques",    deptList: ATLANTIC_DEPTS },
+  { id: "geo_atlantic_10",   type: "geo", label: "Tour du littoral",        description: "Visiter 10 dpts Atlantique & Manche",  target: 10, unit: "dpt atlantiques",    deptList: ATLANTIC_DEPTS },
+  { id: "geo_atlantic_15",   type: "geo", label: "Conquête du littoral",    description: "Visiter les 15 dpts Atlantique & Manche", target: 15, unit: "dpt atlantiques", deptList: ATLANTIC_DEPTS },
+  { id: "geo_med_3",         type: "geo", label: "Méditerranéen",           description: "Visiter 3 dpts méditerranéens",        target: 3,  unit: "dpt méditerranéens", deptList: MEDITERRANEAN_DEPTS },
+  { id: "geo_med_6",         type: "geo", label: "Azur & Mistral",          description: "Visiter 6 dpts méditerranéens",        target: 6,  unit: "dpt méditerranéens", deptList: MEDITERRANEAN_DEPTS },
+  { id: "geo_alpine_3",      type: "geo", label: "Alpiniste",               description: "Visiter 3 dpts alpins",                target: 3,  unit: "dpt alpins",          deptList: ALPINE_DEPTS },
+  { id: "geo_alpine_6",      type: "geo", label: "Conquête des Alpes",      description: "Visiter les 6 dpts alpins",            target: 6,  unit: "dpt alpins",          deptList: ALPINE_DEPTS },
+  { id: "geo_pyrenees_2",    type: "geo", label: "Pyrénéen",                description: "Visiter 2 dpts pyrénéens",             target: 2,  unit: "dpt pyrénéens",       deptList: PYRENEAN_DEPTS },
+  { id: "geo_pyrenees_4",    type: "geo", label: "Traversée des Pyrénées",  description: "Visiter les 4 dpts pyrénéens",         target: 4,  unit: "dpt pyrénéens",       deptList: PYRENEAN_DEPTS },
 ];
 
 /**

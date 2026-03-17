@@ -13,7 +13,7 @@ const DEFAULT_CATEGORIES = [
   { id: 9, name: "Famille & Maison", color: "#6D4C41" },
   { id: 10, name: "Déplacement pro", color: "#546E7A" },
   { id: 11, name: "Ski & Montagne", color: "#0097A7" },
-  { id: 12, name: "Coins à cèpes", color: "#C08552" },
+  { id: 12, name: "Coins à champignon", color: "#C08552" },
 ];
 
 const DEFAULT_PLACES = [

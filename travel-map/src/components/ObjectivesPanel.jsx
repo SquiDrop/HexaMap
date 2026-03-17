@@ -100,7 +100,7 @@ function ObjectivesPanel({ onClose, activeDepartments, activeRegions, visitedPla
         {Object.keys(SECTION_LABELS).map(type => (
           <div key={type} style={{ marginBottom: "16px" }}>
             <div style={{
-              fontSize: "11px", fontWeight: "bold", color: "#aaa",
+              fontSize: "11px", fontWeight: "bold", color: "#ff0000",
               textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "6px"
             }}>
               {SECTION_LABELS[type]}
