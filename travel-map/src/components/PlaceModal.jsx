@@ -61,7 +61,7 @@ function PlaceModal({ isOpen, editIndex, initialData, categories, onSave, onClos
     } else {
       setFormName("");
       setFormComment("");
-      setFormCategoryId(categories[0]?.id || "");
+      setFormCategoryId("");
       setFormPhoto(null);
       setPhotoPreview(null);
     }
@@ -144,7 +144,7 @@ function PlaceModal({ isOpen, editIndex, initialData, categories, onSave, onClos
         <textarea
           value={formComment}
           onChange={e => setFormComment(e.target.value)}
-          placeholder="Avec qui ? Quel souvenir ?"
+          placeholder="Quand ? Avec qui ? Quel souvenir ?"
           style={{ ...inputStyle, height: "60px", resize: "vertical" }}
         />
 
