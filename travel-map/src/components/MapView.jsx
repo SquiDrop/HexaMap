@@ -170,6 +170,16 @@ function MapView() {
         onToggleCategories={() => setShowCategoryManager(prev => !prev)}
         onToggleObjectives={() => setShowObjectives(prev => !prev)}
         showObjectives={showObjectives}
+        lastPlace={visitedPlaces.length > 0 ? visitedPlaces[visitedPlaces.length - 1] : null}
+        topCategory={(() => {
+          if (!visitedPlaces.length) return null;
+          const counts = {};
+          visitedPlaces.forEach(p => {
+            if (p.category?.name) counts[p.category.name] = (counts[p.category.name] || 0) + 1;
+          });
+          const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+          return top ? { name: top[0], count: top[1] } : null;
+        })()}
       />
 
       {showCategoryManager && (

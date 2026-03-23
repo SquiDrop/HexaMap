@@ -110,8 +110,8 @@ function LandingPage({ onStart }) {
       <section className="features-section">
         <div className="feature-card">
           <div className="feature-icon">📍</div>
-          <h3>Marquez vos lieux</h3>
-          <p>Ajoutez vos étapes et catégorisez vos voyages (nature, urbain, ski...).</p>
+          <h3>Marquez vos lieux d'intérêt</h3>
+          <p>Localisez vos souvenirs et catégorisez vos voyages (randos, montagne, roadtrips...)</p>
         </div>
         <div className="feature-card">
           <div className="feature-icon">🗺️</div>
@@ -120,8 +120,8 @@ function LandingPage({ onStart }) {
         </div>
         <div className="feature-card">
           <div className="feature-icon">🏆</div>
-          <h3>Collectionnez</h3>
-          <p>Complétez les départements pour débloquer les 13 régions françaises.</p>
+          <h3>Explorez</h3>
+          <p>96 départements à conquérir. Des défis à relever. Jusqu'où irez-vous ?</p>
         </div>
       </section>
 

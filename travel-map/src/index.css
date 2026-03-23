@@ -83,6 +83,9 @@ button:focus-visible {
 }
 
 /* Supprime le outline de focus sur les couches SVG Leaflet */
-.leaflet-interactive:focus {
+.leaflet-interactive:focus,
+.leaflet-interactive:focus-visible,
+.leaflet-container path:focus,
+.leaflet-container path:focus-visible {
   outline: none;
 }

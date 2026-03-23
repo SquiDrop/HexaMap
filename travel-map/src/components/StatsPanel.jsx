@@ -8,6 +8,8 @@ function StatsPanel({
   onToggleCategories,
   onToggleObjectives,
   showObjectives,
+  lastPlace,
+  topCategory,
 }) {
   const isRegionMode = viewMode === "region";
 
@@ -47,6 +49,20 @@ function StatsPanel({
       <div style={{ fontSize: "40px", fontWeight: "bold", lineHeight: 1.1, marginBottom: "12px" }}>
         {visitedRegionCount} / {totalRegions}
       </div>
+
+      {topCategory && (
+        <div style={{ fontSize: "12px", color: "#888", marginBottom: "4px" }}>
+          <span style={{ fontWeight: "bold", color: "#555" }}>Catégorie favorite</span><br />
+          {topCategory.name} ({topCategory.count})
+        </div>
+      )}
+
+      {lastPlace && (
+        <div style={{ fontSize: "12px", color: "#888", marginBottom: "12px" }}>
+          <span style={{ fontWeight: "bold", color: "#555" }}>Dernier lieu</span><br />
+          {lastPlace.name}
+        </div>
+      )}
 
       <button
         onClick={onToggleViewMode}
