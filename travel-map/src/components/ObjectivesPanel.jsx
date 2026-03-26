@@ -40,7 +40,7 @@ function ChallengeCard({ challenge, progress }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
           <div style={{ fontWeight: "bold", fontSize: "13px" }}>
-            {progress.completed ? "✅ " : ""}{challenge.label}
+            {progress.completed ? "🏅 " : ""}{challenge.label}
           </div>
           <div style={{ fontSize: "11px", color: "#777", marginTop: "2px" }}>
             {challenge.description}

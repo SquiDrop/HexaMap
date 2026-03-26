@@ -11,11 +11,13 @@ import {
   REGIONS_META,
 } from "../utils/mapUtils";
 import { useVisitedPlaces } from "../hooks/useVisitedPlaces";
+import { useBadges } from "../hooks/useBadges";
 import MapClickHandler from "./MapClickHandler";
 import StatsPanel from "./StatsPanel";
 import CategoryManager from "./CategoryManager";
 import PlaceModal from "./PlaceModal";
 import ObjectivesPanel from "./ObjectivesPanel";
+import BadgeToast from "./BadgeToast";
 
 function MapView() {
   const [departementsData, setDepartementsData] = useState(null);
@@ -41,6 +43,8 @@ function MapView() {
     () => getActiveRegions(activeDepartments),
     [activeDepartments]
   );
+
+  const { newBadges, dismissBadge } = useBadges({ activeDepartments, activeRegions, visitedPlaces });
 
   // Chargement GeoJSON
   useEffect(() => {
@@ -160,6 +164,8 @@ function MapView() {
 
   return (
     <>
+      <BadgeToast badges={newBadges} onDismiss={dismissBadge} />
+
       <StatsPanel
         visitedDeptCount={activeDepartments.length}
         totalDepartments={departementsData?.features.length ?? 0}
