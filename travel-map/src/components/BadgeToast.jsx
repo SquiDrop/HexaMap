@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
 
-/**
- * Affiche un toast en bas de l'écran quand un badge est débloqué.
- * Traite les badges en file d'attente (un à la fois).
- */
 function BadgeToast({ badges, onDismiss }) {
   const [visible, setVisible] = useState(false);
   const current = badges[0];
@@ -11,14 +7,16 @@ function BadgeToast({ badges, onDismiss }) {
   useEffect(() => {
     if (!current) return;
     setVisible(false);
-    const showTimer  = setTimeout(() => setVisible(true),  50);
-    const hideTimer  = setTimeout(() => setVisible(false), 3600);
-    const dismissTimer = setTimeout(() => onDismiss(),     4000);
+    const showTimer    = setTimeout(() => setVisible(true),  50);
+    const hideTimer    = setTimeout(() => setVisible(false), 3600);
+    const dismissTimer = setTimeout(() => onDismiss(),       4000);
     return () => {
       clearTimeout(showTimer);
       clearTimeout(hideTimer);
       clearTimeout(dismissTimer);
     };
+  // on dépend de current?.id plutôt que current pour éviter de relancer
+  // l'animation si l'objet badge est recréé avec les même données
   }, [current?.id]);
 
   if (!current) return null;

@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
 import { getDepartmentCodeFromCoords } from "../utils/mapUtils";
 
-const CATEGORIES_VERSION = 5; // Incrémente à chaque mise à jour de DEFAULT_CATEGORIES
+// à incrémenter à chaque fois qu'on modifie DEFAULT_CATEGORIES,
+// sinon les anciens localStorage gardent l'ancienne version
+const CATEGORIES_VERSION = 5;
 
 const DEFAULT_CATEGORIES = [
   { id: 1, name: "Escapade romantique", color: "#E63946" },
@@ -43,7 +45,6 @@ export function useVisitedPlaces(departementsData) {
     return saved ? JSON.parse(saved) : DEFAULT_PLACES;
   });
 
-  // Persistance automatique
   useMemo(() => {
     localStorage.setItem("visitedPlaces", JSON.stringify(visitedPlaces));
   }, [visitedPlaces]);
@@ -52,7 +53,6 @@ export function useVisitedPlaces(departementsData) {
     localStorage.setItem("tripCategories", JSON.stringify({ version: CATEGORIES_VERSION, data: categories }));
   }, [categories]);
 
-  // Calcul des départements actifs
   const activeDepartments = useMemo(() => {
     if (!departementsData) return [];
     const foundCodes = new Set();
@@ -67,7 +67,6 @@ export function useVisitedPlaces(departementsData) {
     return Array.from(foundCodes);
   }, [visitedPlaces, departementsData]);
 
-  // Actions sur les lieux
   const addPlace = (placeData) => {
     setVisitedPlaces((prev) => [...prev, placeData]);
   };
@@ -86,7 +85,6 @@ export function useVisitedPlaces(departementsData) {
     }
   };
 
-  // Actions sur les catégories
   const addCategory = (name, color) => {
     if (!name) return;
     setCategories((prev) => [...prev, { id: Date.now(), name, color }]);

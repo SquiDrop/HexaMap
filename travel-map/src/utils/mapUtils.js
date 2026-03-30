@@ -1,10 +1,6 @@
 import L from "leaflet";
 import * as turf from "@turf/turf";
 
-// ---------------------------------------------------------------------------
-// Icônes
-// ---------------------------------------------------------------------------
-
 export const createCustomIcon = (color) => {
   return L.divIcon({
     className: "custom-marker",
@@ -22,12 +18,9 @@ export const createCustomIcon = (color) => {
   });
 };
 
-// ---------------------------------------------------------------------------
-// Géospatial
-// ---------------------------------------------------------------------------
-
 export const getDepartmentCodeFromCoords = (lat, lng, departementsData) => {
   if (!departementsData) return null;
+  // turf attend [lng, lat], pas [lat, lng] comme Leaflet — à ne pas inverser
   const point = turf.point([lng, lat]);
   for (const feature of departementsData.features) {
     if (turf.booleanPointInPolygon(point, feature)) {
@@ -36,10 +29,6 @@ export const getDepartmentCodeFromCoords = (lat, lng, departementsData) => {
   }
   return null;
 };
-
-// ---------------------------------------------------------------------------
-// Mapping régions <-> départements
-// ---------------------------------------------------------------------------
 
 export const REGIONS_META = [
   { code: "84", nom: "Auvergne-Rhône-Alpes",       departements: ["01","03","07","15","26","38","42","43","63","69","73","74"] },
@@ -57,9 +46,7 @@ export const REGIONS_META = [
   { code: "93", nom: "Provence-Alpes-Côte d'Azur", departements: ["04","05","06","13","83","84"] },
 ];
 
-/**
- * Retourne les codes des régions dont TOUS les départements sont visités.
- */
+// une région est "complétée" seulement si TOUS ses dpts sont visités
 export const getActiveRegions = (activeDepartments) => {
   return REGIONS_META
     .filter((region) =>
@@ -67,10 +54,6 @@ export const getActiveRegions = (activeDepartments) => {
     )
     .map((region) => region.code);
 };
-
-// ---------------------------------------------------------------------------
-// Styles monde
-// ---------------------------------------------------------------------------
 
 const NEARBY_COUNTRIES = [
   "Spain", "Portugal", "Italy", "Belgium", "Netherlands", "Germany",
@@ -87,7 +70,7 @@ const NEARBY_COUNTRIES = [
 
 export const getWorldStyle = (feature) => {
   const name = feature.properties.name;
-  if (name === "France") return { fillOpacity: 0, opacity: 0 };
+  if (name === "France") return { fillOpacity: 0, opacity: 0 }; // transparent pour laisser le fond OSM
   if (NEARBY_COUNTRIES.includes(name)) {
     return {
       fillColor: "#000000",
@@ -100,10 +83,6 @@ export const getWorldStyle = (feature) => {
   return { fillOpacity: 0, opacity: 0 };
 };
 
-// ---------------------------------------------------------------------------
-// Styles départements
-// ---------------------------------------------------------------------------
-
 export const getDepartmentStyle = (feature, activeDepartments) => {
   const isVisited = activeDepartments.includes(feature.properties.code);
   return {
@@ -114,10 +93,6 @@ export const getDepartmentStyle = (feature, activeDepartments) => {
     weight: 1,
   };
 };
-
-// ---------------------------------------------------------------------------
-// Styles régions
-// ---------------------------------------------------------------------------
 
 export const getRegionStyle = (feature, activeRegions) => {
   const code = feature.properties.code;

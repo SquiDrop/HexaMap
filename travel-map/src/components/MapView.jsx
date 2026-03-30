@@ -44,9 +44,8 @@ function MapView() {
     [activeDepartments]
   );
 
-  const { newBadges, dismissBadge } = useBadges({ activeDepartments, activeRegions, visitedPlaces });
+  const { newBadges, dismissBadge } = useBadges({ activeDepartments, activeRegions, visitedPlaces, departementsLoaded: departementsData !== null });
 
-  // Chargement GeoJSON
   useEffect(() => {
     fetch("/departements.geojson").then(r => r.json()).then(setDepartementsData);
   }, []);
@@ -57,7 +56,6 @@ function MapView() {
     fetch("/world.geojson").then(r => r.json()).then(setWorldData);
   }, []);
 
-  // Gestion modal
   const openAddModal = (lat, lng) => setModal({ isOpen: true, coords: [lat, lng], editIndex: null });
   const openEditModal = (index) => setModal({ isOpen: true, coords: visitedPlaces[index].coords, editIndex: index });
   const closeModal = () => setModal({ isOpen: false, coords: null, editIndex: null });
@@ -68,14 +66,12 @@ function MapView() {
     closeModal();
   };
 
-  // Styles et interactions — Départements
   const departmentStyle = (feature) => getDepartmentStyle(feature, activeDepartments);
 
   const onEachDepartment = (feature, layer) => {
     const { code, nom } = feature.properties;
     let tooltipTimer = null;
 
-    // Prépare le tooltip Leaflet (caché par défaut)
     layer.bindTooltip(
       `<div style="font-family:Arial;font-size:13px;text-align:center;padding:2px 4px">
         <strong>${nom}</strong><br/>
@@ -89,14 +85,13 @@ function MapView() {
 
       mouseover: (e) => {
         e.target.setStyle({ weight: 3, color: "#2e1e69" });
-        // Démarre le timer : affiche le tooltip après 3s
+        // tooltip affiché seulement après 3s de hover, pas immédiatement
         tooltipTimer = setTimeout(() => {
           layer.openTooltip(e.latlng);
         }, 3000);
       },
 
       mousemove: () => {
-        // Réinitialise le timer si la souris bouge
         clearTimeout(tooltipTimer);
         layer.closeTooltip();
         tooltipTimer = setTimeout(() => {
@@ -117,7 +112,6 @@ function MapView() {
     });
   };
 
-  // Styles et interactions — Régions
   const regionStyle = (feature) => getRegionStyle(feature, activeRegions);
 
   const onEachRegion = (feature, layer) => {

@@ -1,19 +1,18 @@
-// Côte Atlantique & Manche
+// façade Atlantique + Manche
 const ATLANTIC_DEPTS = [
   "14","17","22","29","33","35","40","44","50","56","59","62","64","76","85"
 ];
 
-// Côte Méditerranée
+// façade Méditerranée (Corse incluse)
 const MEDITERRANEAN_DEPTS = [
   "06","13","34","66","83","2A","2B"
 ];
 
-// Alpes (départements alpins stricts)
+// Alpes (06 est à la fois alpin et méditerranéen, c'est voulu)
 const ALPINE_DEPTS = [
   "04","05","06","38","73","74"
 ];
 
-// Pyrénées
 const PYRENEAN_DEPTS = [
   "09","64","65","66"
 ];
@@ -57,10 +56,6 @@ export const PRESET_CHALLENGES = [
   { id: "geo_pyrenees_4",    type: "geo", label: "Traversée des Pyrénées",  description: "Visiter les 4 dpts pyrénéens",         target: 4,  unit: "dpt pyrénéens",       deptList: PYRENEAN_DEPTS },
 ];
 
-/**
- * Calcule la progression d'un défi prédéfini.
- * Retourne { current, target, percent, completed }
- */
 export const computeChallengeProgress = (challenge, { activeDepartments, activeRegions, visitedPlaces }) => {
   let current = 0;
 

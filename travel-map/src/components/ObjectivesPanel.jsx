@@ -1,8 +1,5 @@
 import { PRESET_CHALLENGES, computeChallengeProgress } from "../hooks/useObjectives";
 
-// ---------------------------------------------------------------------------
-// Barre de progression
-// ---------------------------------------------------------------------------
 
 function ProgressBar({ percent, completed }) {
   return (
@@ -23,9 +20,6 @@ function ProgressBar({ percent, completed }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Carte d'un défi
-// ---------------------------------------------------------------------------
 
 function ChallengeCard({ challenge, progress }) {
   return (
@@ -55,9 +49,6 @@ function ChallengeCard({ challenge, progress }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Panneau principal
-// ---------------------------------------------------------------------------
 
 const SECTION_LABELS = {
   departement: "📍 Départements",
