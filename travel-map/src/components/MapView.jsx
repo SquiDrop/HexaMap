@@ -292,6 +292,13 @@ function MapView() {
                   {place.category?.name || "Inconnu"}
                 </div>
 
+                {/* Date */}
+                {(place.date?.season || place.date?.year) && (
+                  <div style={{ fontSize: "12px", color: "#999" }}>
+                    🗓 {[place.date.season, place.date.year].filter(Boolean).join(" ")}
+                  </div>
+                )}
+
                 {/* Commentaire */}
                 {place.comment && (
                   <div style={{ fontSize: "13px", fontStyle: "italic", color: "#555" }}>

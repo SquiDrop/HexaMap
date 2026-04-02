@@ -40,16 +40,21 @@ const compressImage = (file) => {
 // Composant modal
 // ---------------------------------------------------------------------------
 
+const SEASONS = ["Printemps", "Été", "Automne", "Hiver"];
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = Array.from({ length: CURRENT_YEAR - 1989 }, (_, i) => CURRENT_YEAR - i);
+
 function PlaceModal({ isOpen, editIndex, initialData, categories, onSave, onClose }) {
   const [formName, setFormName]         = useState("");
   const [formComment, setFormComment]   = useState("");
   const [formCategoryId, setFormCategoryId] = useState("");
-  const [formPhoto, setFormPhoto]       = useState(null);  // base64 ou null
-  const [photoPreview, setPhotoPreview] = useState(null);  // URL de préview
+  const [formPhoto, setFormPhoto]       = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [formSeason, setFormSeason]     = useState("");
+  const [formYear, setFormYear]         = useState("");
   const fileInputRef = useRef(null);
 
-  // Pré-remplissage si édition
   useEffect(() => {
     if (initialData) {
       setFormName(initialData.name || "");
@@ -58,12 +63,16 @@ function PlaceModal({ isOpen, editIndex, initialData, categories, onSave, onClos
       setFormCategoryId(matchingCategory ? matchingCategory.id : "");
       setFormPhoto(initialData.photo || null);
       setPhotoPreview(initialData.photo || null);
+      setFormSeason(initialData.date?.season || "");
+      setFormYear(initialData.date?.year ? String(initialData.date.year) : "");
     } else {
       setFormName("");
       setFormComment("");
       setFormCategoryId("");
       setFormPhoto(null);
       setPhotoPreview(null);
+      setFormSeason("");
+      setFormYear("");
     }
   }, [initialData, categories, isOpen]);
 
@@ -109,6 +118,10 @@ function PlaceModal({ isOpen, editIndex, initialData, categories, onSave, onClos
         comment: formComment,
         category: { name: selectedCat.name, color: selectedCat.color },
         photo: formPhoto || null,
+        date: {
+          season: formSeason || null,
+          year: formYear ? parseInt(formYear) : null,
+        },
       },
       editIndex
     );
@@ -160,6 +173,27 @@ function PlaceModal({ isOpen, editIndex, initialData, categories, onSave, onClos
             <option key={cat.id} value={cat.id}>{cat.name}</option>
           ))}
         </select>
+
+        {/* Période */}
+        <label style={labelStyle}>Période</label>
+        <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
+          <select
+            value={formSeason}
+            onChange={e => setFormSeason(e.target.value)}
+            style={{ ...inputStyle, marginBottom: 0, flex: 1 }}
+          >
+            <option value="">Saison oubliée</option>
+            {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+          <select
+            value={formYear}
+            onChange={e => setFormYear(e.target.value)}
+            style={{ ...inputStyle, marginBottom: 0, flex: 1 }}
+          >
+            <option value="">Année oubliée</option>
+            {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+        </div>
 
         {/* Photo */}
         <label style={labelStyle}>Photo du souvenir</label>
