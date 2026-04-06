@@ -1,5 +1,5 @@
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from "react-leaflet";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import "leaflet/dist/leaflet.css";
 
 import {
@@ -10,6 +10,7 @@ import {
   getActiveRegions,
   REGIONS_META,
 } from "../utils/mapUtils";
+import { playDeptUnlock } from "../utils/sounds";
 import { useVisitedPlaces } from "../hooks/useVisitedPlaces";
 import { useBadges } from "../hooks/useBadges";
 import MapClickHandler from "./MapClickHandler";
@@ -45,6 +46,18 @@ function MapView() {
   );
 
   const { newBadges, dismissBadge } = useBadges({ activeDepartments, activeRegions, visitedPlaces, departementsLoaded: departementsData !== null });
+
+  // Son quand un nouveau département est débloqué (pas au chargement initial)
+  const prevDeptCountRef = useRef(null);
+  useEffect(() => {
+    if (!departementsData) return;
+    if (prevDeptCountRef.current === null) {
+      prevDeptCountRef.current = activeDepartments.length;
+      return;
+    }
+    if (activeDepartments.length > prevDeptCountRef.current) playDeptUnlock();
+    prevDeptCountRef.current = activeDepartments.length;
+  }, [activeDepartments.length, departementsData]);
 
   useEffect(() => {
     fetch("/departements.geojson").then(r => r.json()).then(setDepartementsData);

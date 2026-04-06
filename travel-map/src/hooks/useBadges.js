@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { PRESET_CHALLENGES, computeChallengeProgress } from "./useObjectives";
+import { playBadgeUnlock } from "../utils/sounds";
 
 const BADGE_KEY = "earnedBadges";
 
@@ -34,6 +35,7 @@ export function useBadges({ activeDepartments, activeRegions, visitedPlaces, dep
 
     const freshIds = completedIds.filter(id => !prev.includes(id));
     if (freshIds.length > 0) {
+      playBadgeUnlock();
       setNewBadges(q => [...q, ...PRESET_CHALLENGES.filter(c => freshIds.includes(c.id))]);
     }
   }, [completedIds, departementsLoaded]);
