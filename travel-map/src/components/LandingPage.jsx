@@ -110,18 +110,23 @@ function LandingPage({ onStart }) {
       <section className="features-section">
         <div className="feature-card">
           <div className="feature-icon">📍</div>
-          <h3>Marquez vos lieux d'intérêt</h3>
-          <p>Localisez vos souvenirs et catégorisez vos voyages (randos, montagne, roadtrips...)</p>
+          <h3>Posez vos souvenirs</h3>
+          <p>Ajoutez vos lieux visités, choisissez une catégorie, une photo, une saison. Chaque souvenir à sa place sur la carte.</p>
         </div>
         <div className="feature-card">
           <div className="feature-icon">🗺️</div>
           <h3>Colorez l'Hexagone</h3>
-          <p>Regardez votre carte de France prendre vie et se colorer au fil de vos aventures.</p>
+          <p>Regardez votre carte de France prendre vie département par département, région par région.</p>
         </div>
         <div className="feature-card">
-          <div className="feature-icon">🏆</div>
-          <h3>Explorez</h3>
-          <p>96 départements à conquérir. Des défis à relever. Jusqu'où irez-vous ?</p>
+          <div className="feature-icon">🏅</div>
+          <h3>Relevez des défis</h3>
+          <p>Alpes, Pyrénées, littoral atlantique, côte méditerranéenne... Des dizaines de défis géographiques et thématiques à débloquer.</p>
+        </div>
+        <div className="feature-card">
+          <div className="feature-icon">📅</div>
+          <h3>Retracez dans le temps</h3>
+          <p>Associez chaque lieu à une saison et une année. Printemps 2021, été 2023 — ou juste "oublié".</p>
         </div>
       </section>
 

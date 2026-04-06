@@ -18,6 +18,7 @@ import StatsPanel from "./StatsPanel";
 import CategoryManager from "./CategoryManager";
 import PlaceModal from "./PlaceModal";
 import ObjectivesPanel from "./ObjectivesPanel";
+import StatsDrawer from "./StatsDrawer";
 import BadgeToast from "./BadgeToast";
 
 function MapView() {
@@ -26,6 +27,7 @@ function MapView() {
   const [worldData, setWorldData] = useState(null);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [showObjectives, setShowObjectives] = useState(false);
+  const [showStats, setShowStats] = useState(false);
   const [viewMode, setViewMode] = useState("departement");
   const [modal, setModal] = useState({ isOpen: false, coords: null, editIndex: null });
 
@@ -174,26 +176,25 @@ function MapView() {
       <BadgeToast badges={newBadges} onDismiss={dismissBadge} />
 
       <StatsPanel
-        visitedDeptCount={activeDepartments.length}
-        totalDepartments={departementsData?.features.length ?? 0}
-        visitedRegionCount={activeRegions.length}
-        totalRegions={REGIONS_META.length}
         viewMode={viewMode}
         onToggleViewMode={() => setViewMode(v => v === "departement" ? "region" : "departement")}
         onToggleCategories={() => setShowCategoryManager(prev => !prev)}
         onToggleObjectives={() => setShowObjectives(prev => !prev)}
         showObjectives={showObjectives}
-        lastPlace={visitedPlaces.length > 0 ? visitedPlaces[visitedPlaces.length - 1] : null}
-        topCategory={(() => {
-          if (!visitedPlaces.length) return null;
-          const counts = {};
-          visitedPlaces.forEach(p => {
-            if (p.category?.name) counts[p.category.name] = (counts[p.category.name] || 0) + 1;
-          });
-          const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
-          return top ? { name: top[0], count: top[1] } : null;
-        })()}
+        onToggleStats={() => setShowStats(prev => !prev)}
+        showStats={showStats}
       />
+
+      {showStats && (
+        <StatsDrawer
+          onClose={() => setShowStats(false)}
+          visitedPlaces={visitedPlaces}
+          activeDepartments={activeDepartments}
+          activeRegions={activeRegions}
+          totalDepartments={departementsData?.features.length ?? 96}
+          totalRegions={REGIONS_META.length}
+        />
+      )}
 
       {showCategoryManager && (
         <CategoryManager

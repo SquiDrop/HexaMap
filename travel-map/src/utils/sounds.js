@@ -4,5 +4,5 @@ const play = (src) => {
   } catch (_) {}
 };
 
-export const playDeptUnlock  = () => play("/sounds/dept-unlock.mp3");
-export const playBadgeUnlock = () => play("/sounds/badge-unlock.wav");
+export const playDeptUnlock  = () => play("/sounds/dept-unlock.wav");
+export const playBadgeUnlock = () => play("/sounds/badge-unlock.mp3");
