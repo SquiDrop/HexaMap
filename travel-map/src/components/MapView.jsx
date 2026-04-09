@@ -21,7 +21,7 @@ import ObjectivesPanel from "./ObjectivesPanel";
 import StatsDrawer from "./StatsDrawer";
 import BadgeToast from "./BadgeToast";
 
-function MapView() {
+function MapView({ onBack }) {
   const [departementsData, setDepartementsData] = useState(null);
   const [regionsData, setRegionsData] = useState(null);
   const [worldData, setWorldData] = useState(null);
@@ -49,7 +49,23 @@ function MapView() {
 
   const { newBadges, dismissBadge } = useBadges({ activeDepartments, activeRegions, visitedPlaces, departementsLoaded: departementsData !== null });
 
-  // Son quand un nouveau département est débloqué (pas au chargement initial)
+  // displayedDepartments suit activeDepartments avec 1s de délai —
+  // permet à la modal de se fermer avant que le département se colorie.
+  // Le chargement initial (GeoJSON) est instantané pour ne pas avoir un délai au démarrage.
+  const [displayedDepartments, setDisplayedDepartments] = useState([]);
+  const deptInitializedRef = useRef(false);
+  useEffect(() => {
+    if (!departementsData) return;
+    if (!deptInitializedRef.current) {
+      deptInitializedRef.current = true;
+      setDisplayedDepartments(activeDepartments);
+      return;
+    }
+    const timer = setTimeout(() => setDisplayedDepartments(activeDepartments), 1000);
+    return () => clearTimeout(timer);
+  }, [activeDepartments, departementsData]);
+
+  // Son avec le même délai d'1s
   const prevDeptCountRef = useRef(null);
   useEffect(() => {
     if (!departementsData) return;
@@ -57,7 +73,8 @@ function MapView() {
       prevDeptCountRef.current = activeDepartments.length;
       return;
     }
-    if (activeDepartments.length > prevDeptCountRef.current) playDeptUnlock();
+    if (activeDepartments.length > prevDeptCountRef.current)
+      setTimeout(() => playDeptUnlock(), 1000);
     prevDeptCountRef.current = activeDepartments.length;
   }, [activeDepartments.length, departementsData]);
 
@@ -81,7 +98,7 @@ function MapView() {
     closeModal();
   };
 
-  const departmentStyle = (feature) => getDepartmentStyle(feature, activeDepartments);
+  const departmentStyle = (feature) => getDepartmentStyle(feature, displayedDepartments);
 
   const onEachDepartment = (feature, layer) => {
     const { code, nom } = feature.properties;
@@ -117,7 +134,7 @@ function MapView() {
       mouseout: (e) => {
         clearTimeout(tooltipTimer);
         layer.closeTooltip();
-        const isVisited = activeDepartments.includes(code);
+        const isVisited = displayedDepartments.includes(code);
         e.target.setStyle({
           weight: 1, color: "#191919",
           opacity: isVisited ? 1 : 0.4,
@@ -174,6 +191,33 @@ function MapView() {
   return (
     <>
       <BadgeToast badges={newBadges} onDismiss={dismissBadge} />
+
+      {/* Titre centré */}
+      <div style={{
+        position: "absolute", top: "16px", left: "50%", transform: "translateX(-50%)",
+        zIndex: 1000, pointerEvents: "none",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        fontSize: "22px", fontWeight: 900, letterSpacing: "3px",
+        color: "#e63946",
+        textShadow: "0 1px 4px rgba(0,0,0,0.12)",
+      }}>
+        HEXAMAP
+      </div>
+
+      {/* Bouton retour */}
+      <button
+        onClick={onBack}
+        title="Retour à l'accueil"
+        style={{
+          position: "absolute", top: "90px", left: "12px", zIndex: 1000,
+          background: "white", border: "none", borderRadius: "8px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+          cursor: "pointer", padding: "8px 12px",
+          fontSize: "18px", lineHeight: 1,
+        }}
+      >
+        ←
+      </button>
 
       <StatsPanel
         viewMode={viewMode}
@@ -245,7 +289,7 @@ function MapView() {
 
         {viewMode === "departement" && departementsData && (
           <GeoJSON
-            key={"dept-" + activeDepartments.join(",")}
+            key={"dept-" + displayedDepartments.join(",")}
             data={departementsData}
             style={departmentStyle}
             onEachFeature={onEachDepartment}

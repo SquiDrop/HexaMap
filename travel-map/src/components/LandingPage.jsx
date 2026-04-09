@@ -64,15 +64,16 @@ function LandingPage({ onStart }) {
         .features-section {
           display: flex;
           justify-content: space-around;
-          flex-wrap: wrap;
-          padding: 10px 10%;
-          gap: 20px;
+          flex-wrap: nowrap;
+          padding: 10px 4%;
+          gap: 14px;
         }
         .feature-card {
           background: rgba(255, 255, 255, 0.9);
-          padding: 20px;
+          padding: 18px;
           border-radius: 15px;
-          width: 250px;
+          flex: 1;
+          min-width: 0;
           text-align: center;
           box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
