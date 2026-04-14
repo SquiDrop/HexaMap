@@ -1,6 +1,6 @@
 # HexaMap 🗺️
 
-**HexaMap** est une application web interactive de suivi de voyages centrée sur la France. Elle permet de visualiser ses lieux visités sur une carte, de suivre sa progression département par département, et de débloquer des défis au fil de l'exploration.
+**HexaMap** (contraction de Hexagone et Map) est une application web interactive de suivi de voyages centrée sur la France. Elle permet de visualiser ses lieux visités sur une carte, de suivre sa progression département par département, et de débloquer des défis au fil de l'exploration.
 
 ---
 

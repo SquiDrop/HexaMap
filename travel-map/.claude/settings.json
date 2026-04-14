@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(find /c/Users/lexma/OneDrive/Bureau/Etudes/ENSC/S8/P2I/HexaMap/travel-map/src -type f \\\\\\(-name *.tsx -o -name *.ts -o -name *.jsx -o -name *.js \\\\\\))",
-      "Read(//c/Users/lexma/.claude/projects/c--Users-lexma-OneDrive-Bureau-Etudes-ENSC-S8-P2I-HexaMap/memory//**)"
-    ]
-  }
-}
