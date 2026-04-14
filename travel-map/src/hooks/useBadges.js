@@ -35,8 +35,11 @@ export function useBadges({ activeDepartments, activeRegions, visitedPlaces, dep
 
     const freshIds = completedIds.filter(id => !prev.includes(id));
     if (freshIds.length > 0) {
-      playBadgeUnlock();
-      setNewBadges(q => [...q, ...PRESET_CHALLENGES.filter(c => freshIds.includes(c.id))]);
+      const earned = PRESET_CHALLENGES.filter(c => freshIds.includes(c.id));
+      setTimeout(() => {
+        playBadgeUnlock();
+        setNewBadges(q => [...q, ...earned]);
+      }, 1000);
     }
   }, [completedIds, departementsLoaded]);
 

@@ -194,12 +194,16 @@ function MapView({ onBack }) {
 
       {/* Titre centré */}
       <div style={{
-        position: "absolute", top: "16px", left: "50%", transform: "translateX(-50%)",
+        position: "absolute", top: "20px", left: "50%", transform: "translateX(-50%)",
         zIndex: 1000, pointerEvents: "none",
+        background: "white",
+        borderRadius: "24px",
+        padding: "7px 24px",
+        boxShadow: "0 4px 16px rgba(0,0,0,0.18)",
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-        fontSize: "22px", fontWeight: 900, letterSpacing: "3px",
+        fontSize: "20px", fontWeight: 900, letterSpacing: "4px",
         color: "#e63946",
-        textShadow: "0 1px 4px rgba(0,0,0,0.12)",
+        whiteSpace: "nowrap",
       }}>
         HEXAMAP
       </div>
