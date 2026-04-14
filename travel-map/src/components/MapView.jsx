@@ -88,7 +88,17 @@ function MapView({ onBack }) {
     fetch("/world.geojson").then(r => r.json()).then(setWorldData);
   }, []);
 
-  const openAddModal = (lat, lng) => setModal({ isOpen: true, coords: [lat, lng], editIndex: null });
+  // Quand on supprime un lieu depuis le popup, le clic remonte jusqu'à la carte
+  // et rouvre la fenêtre d'ajout. Ce ref bloque le prochain clic carte.
+  const suppressNextMapClick = useRef(false);
+
+  const openAddModal = (lat, lng) => {
+    if (suppressNextMapClick.current) {
+      suppressNextMapClick.current = false;
+      return;
+    }
+    setModal({ isOpen: true, coords: [lat, lng], editIndex: null });
+  };
   const openEditModal = (index) => setModal({ isOpen: true, coords: visitedPlaces[index].coords, editIndex: index });
   const closeModal = () => setModal({ isOpen: false, coords: null, editIndex: null });
 
@@ -377,7 +387,7 @@ function MapView({ onBack }) {
                     Modifier
                   </button>
                   <button
-                    onClick={() => removePlace(idx)}
+                    onClick={() => { suppressNextMapClick.current = true; removePlace(idx); }}
                     style={{ background: "#e74c3c", color: "white", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer", fontSize: "11px" }}
                   >
                     Supprimer
