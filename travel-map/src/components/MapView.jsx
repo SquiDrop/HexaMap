@@ -367,7 +367,7 @@ function MapView({ onBack }) {
                 {/* Date */}
                 {(place.date?.season || place.date?.year) && (
                   <div style={{ fontSize: "12px", color: "#999" }}>
-                    🗓 {[place.date.season, place.date.year].filter(Boolean).join(" ")}
+                    📅 {[place.date.season, place.date.year].filter(Boolean).join(" ")}
                   </div>
                 )}
 

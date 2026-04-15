@@ -89,10 +89,11 @@ function ObjectivesPanel({ onClose, activeDepartments, activeRegions, visitedPla
       {/* Contenu scrollable */}
       <div style={{ overflowY: "auto", padding: "0 15px 15px" }}>
         {Object.keys(SECTION_LABELS).map(type => (
-          <div key={type} style={{ marginBottom: "16px" }}>
+          <div key={type} style={{ marginBottom: "24px" }}>
             <div style={{
-              fontSize: "11px", fontWeight: "bold", color: "#ff0000",
-              textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "6px"
+              fontSize: "13px", fontWeight: "bold", color: "#ff0000",
+              textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "8px",
+              borderBottom: "1px solid #f0f0f0", paddingBottom: "6px",
             }}>
               {SECTION_LABELS[type]}
             </div>
